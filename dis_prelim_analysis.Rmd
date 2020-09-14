@@ -1,0 +1,190 @@
+---
+title: "Dissertation Preliminary Analyses"
+author: "Steven T. Tseng"
+date: '`r paste("First created on Dec 23, 2019. Updated on", Sys.Date())`'
+output:
+  html_notebook:
+    theme: cerulean
+    highlight: tango
+    number_sections: yes
+    toc: yes
+---
+
+```{r, warning = FALSE, message = FALSE}
+library(dplyr)
+library(tidyr)
+library(readr)
+library(tibble)
+library(readxl)
+library(psych)
+library(lavaan)
+library(magrittr)
+
+options(digits = 3)
+```
+
+```{r}
+dat <- read_xlsx("./Dissertation Data/dissertationdataCLEAN.xlsx")
+
+print(dat)
+```
+
+# Scale Reliabilities
+
+## Org Dehumanization
+
+```{r}
+dat %>%
+  select(orgdehum_1:orgdehum_11) %>%
+  as.data.frame(.) %>%
+  psych::alpha(.)
+```
+***Alpha improves to .96 if Item 1 is dropped
+
+## HR Attributions
+
+```{r}
+dat %>%
+  select(exploit_1:wbatt_3) %>%
+  psych::alpha(.)
+```
+Horrible alpha, as expected
+
+## Exploitation Attributions
+```{r}
+dat %>%
+  select(exploit_1:exploit_3) %>%
+  psych::alpha(.)
+```
+
+## Cost-saving Attributions
+```{r}
+dat %>%
+  select(cost_1:cost_3) %>%
+  psych::alpha(.)
+```
+
+## Performance Attributions
+```{r}
+dat %>%
+  select(perfatt_1:perfatt_3) %>%
+  psych::alpha(.)
+```
+Alpha improves to .93 if Item 3 dropped
+
+## Well-being Attributions
+```{r}
+dat %>%
+  select(wbatt_1:wbatt_3) %>%
+  psych::alpha(.)
+```
+
+## BLM
+```{r}
+dat %>%
+  select(sblm_1:sblm_4) %>%
+  psych::alpha(.)
+```
+
+## SOE
+```{r}
+dat %>%
+  select(soe_1:soe_9) %>%
+  psych::alpha(.)
+```
+
+## Job Satisfaction
+```{r}
+dat %>%
+  select(jobsat_1:jobsat_3) %>%
+  psych::alpha(.)
+```
+
+## Affective Commitment
+```{r}
+dat %>%
+  select(acommit_1:acommit_6) %>%
+  psych::alpha(.)
+```
+
+## Turnover Intentions
+```{r}
+dat %>%
+  select(tointent_1:tointent_2) %>%
+  psych::alpha(.)
+```
+
+## Burnout
+```{r}
+dat %>%
+  select(diseng_1r:exhaust_8r) %>%
+  psych::alpha(.)
+```
+
+## Burnout: Disengagement
+```{r}
+dat %>%
+  select(diseng_1r, diseng_2, diseng_3, diseng_4r, diseng_5, diseng_6, diseng_7r, diseng_8r) %>%
+  psych::alpha(.)
+```
+
+## Burnout: Exhaustion
+```{r}
+dat %>%
+  select(exhaust_1, exhaust_2, exhaust_3r, exhaust_4, exhaust_5r, exhaust_6, exhaust_7r, exhaust_8r) %>%
+  psych::alpha(.)
+```
+****Alpha improves to .88 if Item 7r dropped
+
+## Task Performance
+```{r}
+dat %>%
+  select(perf_1:perf_5) %>%
+  psych::alpha(.)
+```
+****Alpha improves to .897 if Item 5 dropped 
+
+## OCBs
+```{r}
+dat %>%
+  select(ocb_1:ocb_10) %>%
+  psych::alpha(.)
+```
+
+## CWBs
+```{r}
+dat %>%
+  select(cwb_1:cwb_10) %>%
+  psych::alpha(.)
+```
+
+## POS
+```{r}
+dat %>%
+  select(pos_1:pos_8) %>%
+  psych::alpha(.)
+```
+
+# Factor Structures
+
+## Examine HR Attributions Factor Structure
+```{r}
+hratt.model <- 'exploit =~ exploit_1 + exploit_2 + exploit_3
+                cost =~ cost_1 + cost_2 + cost_3
+                perfatt =~ perfatt_1 + perfatt_2 + perfatt_3
+                wbatt =~ wbatt_1 + wbatt_2 + wbatt_3'
+
+hratt.fit <- cfa(hratt.model, data = dat)
+summary(hratt.fit, fit.measures = TRUE)
+```
+****Acceptable fit measures
+
+## Examine Burnout Factor Structure
+```{r}
+burnout.model <- 'diseng =~ diseng_1r + diseng_2 + diseng_3 + diseng_4r + diseng_5 + diseng_6 + diseng_7r + diseng_8r
+exhaust =~ exhaust_1 + exhaust_2 + exhaust_3r + exhaust_4 + exhaust_5r + exhaust_6 + exhaust_7r + exhaust_8r'
+
+burnout.fit <- cfa(burnout.model, data = dat)
+summary(burnout.fit, fit.measures = TRUE)
+```
+****Not very good fit
