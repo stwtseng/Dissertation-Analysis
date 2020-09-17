@@ -1,0 +1,2888 @@
+---
+title: "Dissertation Analysis Compiled"
+author: "Steven T. Tseng"
+date: '`r paste("First created on Dec 24, 2019. Updated on", Sys.Date())`'
+output: 
+  html_notebook:
+    theme: cerulean
+    highlight: tango
+    number_sections: yes
+    toc: yes
+---
+
+```{r, message = FALSE}
+library(dplyr)
+library(readxl)
+library(psych)
+library(lattice)
+library(ggplot2)
+library(lavaan)
+library(magrittr)
+library(broom)
+
+options(digits = 3)
+theme_set(theme_classic())
+
+dat <- read_xlsx("./Dissertation Data/dissertationdataCOMPLETE.xlsx")
+```
+
+
+****
+
+# Scale Reliabilities
+
+## Org Dehumanization
+
+```{r}
+dat %>%
+  select(orgdehum_1:orgdehum_11) %>%
+  as.data.frame(.) %>%
+  psych::alpha(.)
+```
+***Alpha improves to .96 if Item 1 is dropped
+
+## HR Attributions
+
+```{r}
+dat %>%
+  select(exploit_1:wbatt_3) %>%
+  psych::alpha(.)
+```
+
+Horrible alpha, as expected. Scale consists of two conceptually distinct factors.
+
+## Exploitation Attributions
+```{r}
+dat %>%
+  select(exploit_1:exploit_3) %>%
+  psych::alpha(.)
+```
+
+## Cost-saving Attributions
+```{r}
+dat %>%
+  select(cost_1:cost_3) %>%
+  psych::alpha(.)
+```
+
+## Performance Attributions
+```{r}
+dat %>%
+  select(perfatt_1:perfatt_3) %>%
+  psych::alpha(.)
+```
+Alpha improves to .93 if Item 3 dropped
+
+## Well-being Attributions
+```{r}
+dat %>%
+  select(wbatt_1:wbatt_3) %>%
+  psych::alpha(.)
+```
+
+## BLM
+```{r}
+dat %>%
+  select(sblm_1:sblm_4) %>%
+  psych::alpha(.)
+```
+
+## SOE
+```{r}
+dat %>%
+  select(soe_1:soe_9) %>%
+  psych::alpha(.)
+```
+
+## Job Satisfaction
+```{r}
+dat %>%
+  select(jobsat_1:jobsat_3) %>%
+  psych::alpha(.)
+```
+
+## Affective Commitment
+```{r}
+dat %>%
+  select(acommit_1:acommit_6) %>%
+  psych::alpha(.)
+```
+
+## Turnover Intentions
+```{r}
+dat %>%
+  select(tointent_1:tointent_2) %>%
+  psych::alpha(.)
+```
+
+## Burnout
+```{r}
+dat %>%
+  select(diseng_1r:exhaust_8r) %>%
+  psych::alpha(.)
+```
+
+## Burnout: Disengagement
+```{r}
+dat %>%
+  select(diseng_1r, diseng_2, diseng_3, diseng_4r, diseng_5, diseng_6, diseng_7r, diseng_8r) %>%
+  psych::alpha(.)
+```
+
+## Burnout: Exhaustion
+```{r}
+dat %>%
+  select(exhaust_1, exhaust_2, exhaust_3r, exhaust_4, exhaust_5r, exhaust_6, exhaust_7r, exhaust_8r) %>%
+  psych::alpha(.)
+```
+****Alpha improves to .88 if Item 7r dropped
+
+## Task Performance
+```{r}
+dat %>%
+  select(perf_1:perf_5) %>%
+  psych::alpha(.)
+```
+****Alpha improves to .897 if Item 5 dropped 
+
+## OCBs
+```{r}
+dat %>%
+  select(ocb_1:ocb_10) %>%
+  psych::alpha(.)
+```
+
+## CWBs
+```{r}
+dat %>%
+  select(cwb_1:cwb_10) %>%
+  psych::alpha(.)
+```
+
+## POS
+```{r}
+dat %>%
+  select(pos_1:pos_8) %>%
+  psych::alpha(.)
+```
+
+****
+
+# Factor Structures
+
+## Examine HR Attributions Factor Structure
+```{r}
+hratt.model <- 'exploit =~ exploit_1 + exploit_2 + exploit_3
+                cost =~ cost_1 + cost_2 + cost_3
+                perform =~ perfatt_1 + perfatt_2 + perfatt_3
+                wb =~ wbatt_1 + wbatt_2 + wbatt_3'
+
+hratt.fit <- cfa(hratt.model, data = dat)
+summary(hratt.fit, fit.measures = TRUE)
+```
+****Acceptable fit measures
+
+## Examine Burnout Factor Structure
+```{r}
+burnout.model <- 'disengage =~ diseng_1r + diseng_2 + diseng_3 + diseng_4r + diseng_5 + diseng_6 + diseng_7r + diseng_8r
+exhaustion =~ exhaust_1 + exhaust_2 + exhaust_3r + exhaust_4 + exhaust_5r + exhaust_6 + exhaust_7r + exhaust_8r'
+
+burnout.fit <- cfa(burnout.model, data = dat)
+summary(burnout.fit, fit.measures = TRUE)
+```
+****Not very good fit
+
+****
+
+# Descriptive Statistics
+****
+## Demographics
+****
+### Organization Type
+```{r}
+dat %>%
+  mutate(orgtype = recode(orgtype, `0` = "nonprofit", `1` = "for-profit")) %>%
+  select(orgtype) %>%
+  group_by(orgtype) %>%
+  tally()
+```
+
+### Organization Size
+```{r}
+dat %>%
+  mutate(orgsize = recode_factor(orgsize, `1` = "less than 10",
+                          `2` = "10 to 49",
+                          `3` = "50 to 99",
+                          `4` = "100 to 499",
+                          `5` = "500 to 999",
+                          `6` = "1000 or more"), .ordered = TRUE) %>%
+  select(orgsize) %>%
+  group_by(orgsize) %>%
+  tally()
+
+dat %>%
+  mutate(orgsize = recode_factor(orgsize, `1` = "less than 10",
+                          `2` = "10 to 49",
+                          `3` = "50 to 99",
+                          `4` = "100 to 499",
+                          `5` = "500 to 999",
+                          `6` = "1000 or more"), .ordered = TRUE) %>%
+  select(orgsize) %>%
+  barchart(.)
+```
+
+### Organization Levels
+```{r}
+dat %>%
+  mutate(orglevels = recode_factor(orglevels, `1` = "three or fewer levels",
+                                   `2` = "four levels",
+                                   `3` = "five levels",
+                                   `4` = "six levels",
+                                   `5` = "seven levels or more", .ordered = TRUE)) %>%
+  select(orglevels) %>%
+  group_by(orglevels) %>%
+  tally()
+
+dat %>%
+  mutate(orglevels = recode_factor(orglevels, `1` = "three or fewer levels",
+                                   `2` = "four levels",
+                                   `3` = "five levels",
+                                   `4` = "six levels",
+                                   `5` = "seven levels or more", .ordered = TRUE)) %>%
+  select(orglevels) %>%
+  barchart(.)
+```
+
+### Organization Centrality
+```{r}
+dat %>%
+  mutate(orgcent = recode_factor(orgcent, `1` = "CEO, president, or managing director",
+                                 `2` = "corporate management",
+                                 `3` = "branch management",
+                                 `4` = "input from frontline employees",
+                                 `5` = "other"), .ordered = TRUE) %>%
+  select(orgcent) %>%
+  group_by(orgcent) %>%
+  tally()
+
+dat %>%
+  mutate(orgcent = recode_factor(orgcent, `1` = "CEO, president, or managing director",
+                                 `2` = "corporate management",
+                                 `3` = "branch management",
+                                 `4` = "input from frontline employees",
+                                 `5` = "other"), .ordered = TRUE) %>%
+  select(orgcent) %>%
+  barchart(.)
+```
+
+### Region
+```{r}
+dat %>%
+  select(region) %>%
+  group_by(region) %>%
+  tally()
+
+dat %>%
+  select(region) %>%
+  barchart(.)
+```
+
+### Industry
+```{r}
+dat %>%
+  select(industry) %>%
+  group_by(industry) %>%
+  tally()
+
+dat %>%
+  select(industry) %>%
+  barchart(.)
+```
+
+### Employment Status
+```{r}
+dat %>%
+  mutate(status = recode(status, `0` = "full-time",
+                         `1` = "part-time")) %>% # recode full-time = 0, part-time = 1
+  select(status) %>%
+  group_by(status) %>%
+  tally()
+```
+
+
+### Responsible for Direct Reports
+```{r}
+dat %>%
+  mutate(dirreport = recode(dirreport, `1` = "yes", `0` = "no")) %>%
+  select(dirreport) %>%
+  group_by(dirreport) %>%
+  tally()
+
+dat %>%
+  mutate(dirreport = recode(dirreport, `1` = "yes", `0` = "no")) %>%
+  select(dirreport) %>%
+  barchart(.)
+```
+
+### Salary
+```{r}
+dat %>%
+  mutate(salary = recode_factor(salary, `1` = "less than $10,000",
+                                `2` = "$10,000 to $19,999",
+                                `3` = "$20,000 to $29,999",
+                                `4` = "$30,000 to $39,999",
+                                `5` = "$40,000 to $49,999",
+                                `6` = "$50,000 to $59,999",
+                                `7` = "$60,000 to $69,999",
+                                `8` = "$70,000 or more", .ordered = TRUE)) %>%
+  select(salary) %>%
+  group_by(salary) %>%
+  tally()
+
+dat %>%
+  mutate(salary = recode_factor(salary, `1` = "less than $10,000",
+                                `2` = "$10,000 to $19,999",
+                                `3` = "$20,000 to $29,999",
+                                `4` = "$30,000 to $39,999",
+                                `5` = "$40,000 to $49,999",
+                                `6` = "$50,000 to $59,999",
+                                `7` = "$60,000 to $69,999",
+                                `8` = "$70,000 or more", .ordered = TRUE)) %>%
+  select(salary) %>%
+  barchart(.)
+```
+
+### Weekly Hours
+```{r}
+dat %>%
+  dplyr::select(weekhours)
+dat %>%
+  dplyr::select(weekhours) %>%
+  filter(weekhours < 25)
+dat %>%
+  dplyr::select(weekhours) %>%
+  filter(weekhours >= 40)
+histogram(dat$weekhours, type = "count", breaks = c(7.5:72.5))
+```
+
+
+### Gender
+```{r}
+dat %>%
+  mutate(gender = recode(gender, `0` = "male",
+                                `1` = "female")) %>%
+  select(gender) %>%
+  group_by(gender) %>%
+  tally()
+
+dat %>%
+  mutate(gender = recode_factor(gender, `0` = "male",
+                               `1` = "female")) %>%
+  select(gender) %>%
+  barchart(.)
+```
+
+### Age
+```{r}
+dat %>%
+  mutate(age = recode_factor(age, `1` = "18-24",
+                             `2` = "25-30",
+                             `3` = "31-40",
+                             `4` = "41-50",
+                             `5` = "51-60",
+                             `6` = "over 60")) %>%
+  select(age) %>%
+  group_by(age) %>%
+  tally()
+
+dat %>%
+  mutate(age = recode_factor(age, `1` = "18-24",
+                             `2` = "25-30",
+                             `3` = "31-40",
+                             `4` = "41-50",
+                             `5` = "51-60",
+                             `6` = "over 60")) %>%
+  select(age) %>%
+  barchart(.)
+```
+
+### Race
+```{r}
+dat %>%
+  select(race) %>%
+  group_by(race) %>%
+  tally()
+
+dat %>%
+  select(race) %>%
+  barchart(.)
+```
+
+### English First Language
+```{r}
+dat %>%
+  mutate(english = recode(english, `1` = "english first language",
+                                 `0` = "english not first language")) %>%
+  select(english) %>%
+  group_by(english) %>%
+  tally()
+```
+
+### Marital Status
+```{r}
+dat %>%
+  select(marital) %>%
+  group_by(marital) %>%
+  tally()
+
+dat %>%
+  select(marital) %>%
+  barchart(.)
+```
+
+### Education
+```{r}
+dat %>%
+  mutate(edu = recode_factor(edu, `1` = "high school, GED",
+                             `2` = "associates",
+                             `3` = "college",
+                             `4` = "masters",
+                             `5` = "doctoral", .ordered = TRUE)) %>%
+  select(edu) %>%
+  group_by(edu) %>%
+  tally()
+
+dat %>%
+    mutate(edu = recode_factor(edu, `1` = "high school, GED",
+                             `2` = "associates",
+                             `3` = "college",
+                             `4` = "masters",
+                             `5` = "doctoral", .ordered = TRUE)) %>%
+  select(edu) %>%
+  barchart(.)
+  
+```
+
+****
+
+## Constructs of Interest 
+****
+
+### HR Attributions
+```{r}
+dat %>%
+  select(exploitatt:wbatt) %>%
+  psych::describe(.)
+```
+
+### BLM, SOE, Org Dehumanization and POS
+```{r}
+dat %>%
+  select(sblm:pos) %>%
+  psych::describe(.)
+```
+
+### Outcome Variables
+```{r}
+dat %>%
+  select(jobsat:cwb) %>%
+  psych::describe(.)
+```
+
+****
+
+Noteworthy observations:
+
+* Exploitation attributions, BLM, and org dehumanization perceptions below scale midpoint
+
+* Sample appears to include mostly individuals with positive job attitudes and low on negative predictors
+
+****
+
+#  Bar Graphs and Histograms
+
+## Exploitation Attributions
+```{r}
+histogram(dat$exploitatt, type = "count", breaks = c(0.5:7.5))
+```
+
+```{r}
+qqnorm(dat$exploitatt)
+qqline(dat$exploitatt)
+```
+
+```{r}
+shapiro.test(dat$exploitatt)
+```
+
+Data appear to be positively skewed.
+
+## Well-being Attributions
+```{r}
+histogram(dat$wbatt, type = "count", breaks = c(0.5:7.5))
+```
+
+```{r}
+qqnorm(dat$wbatt)
+qqline(dat$wbatt)
+```
+
+```{r}
+shapiro.test(dat$wbatt)
+```
+
+Negatively skewed.
+
+## BLM
+```{r}
+histogram(dat$sblm, type = "count", breaks = c(0.5:7.5))
+```
+
+```{r}
+qqnorm(dat$sblm)
+qqline(dat$sblm)
+```
+
+```{r}
+shapiro.test(dat$sblm)
+```
+
+Positively skewed.
+
+## SOE
+```{r}
+histogram(dat$soe, type = "count", breaks = c(0.5:7.5))
+```
+
+```{r}
+qqnorm(dat$soe)
+qqline(dat$soe)
+```
+
+```{r}
+shapiro.test(dat$soe)
+```
+
+Negative skew.
+
+## Org Dehumanization
+```{r}
+histogram(dat$orgdehum, type = "count", breaks = c(0.5:7.5))
+```
+
+```{r}
+qqnorm(dat$orgdehum)
+qqline(dat$orgdehum)
+```
+
+```{r}
+shapiro.test(dat$orgdehum)
+```
+
+Positive skew.
+
+**** Note: Variables of interest appear to be non-normal, which violates the assumptions for a significance test for correlations involving the variables.
+
+****
+
+# Scatterplot Matrix
+
+## Antecedents and Org Dehumanization
+```{r}
+library(car)
+dat %>%
+  select(exploitatt, wbatt, sblm, soe, orgdehum) %>%
+  scatterplotMatrix(.)
+```
+
+## Org Dehumanization and Attitudes
+```{r}
+dat %>%
+  select(orgdehum, jobsat, acommit, tointent) %>%
+  scatterplotMatrix(.)
+```
+
+## Org Dehumanization and Burnout
+```{r}
+dat %>%
+  select(orgdehum, diseng, exhaust, burnout) %>%
+  scatterplotMatrix(.)
+```
+
+## Org Dehumanization and Performance
+```{r}
+dat %>%
+  select(orgdehum, perf, ocb, cwb) %>%
+  scatterplotMatrix(.)
+```
+
+****
+
+# Primary Analyses
+
+****
+
+Load additional libraries and set default rounding value and graph theme.
+
+```{r, message = FALSE}
+library(effects)
+library(lattice)
+library(Hmisc)
+library(xtable)
+
+options(digits = 4)
+
+theme_set(theme_classic())
+```
+
+****
+
+## Means and Standard Deviations
+```{r}
+dat %>%
+  select(orgdehum, exploitatt, wbatt, sblm, soe, jobsat, acommit, burnout, tointent, perf, ocb, cwb, selection, training, appraisal, compensation, hrpractices, orgtype, orgsize, orglevels, orgcent, gender, age, racenum, english, edu, status, orgtenure, postenure, suptenure, dirreport, weekhours, salary) %>%
+  psych::describe(.)
+```
+
+****
+
+## Pearson Correlations
+```{r}
+source("corstars.R")
+
+dat %>%
+  select(orgdehum, exploitatt, wbatt, sblm, soe, jobsat, acommit, burnout, tointent, perf, ocb, cwb, selection, training, appraisal, compensation, hrpractices, orgtype, orgsize, orglevels, orgcent, gender, age, racenum, english, edu, status, orgtenure, postenure, suptenure, dirreport, weekhours, salary) %>%
+  as.matrix(.) %>%
+  corstars(., method = "pearson")
+
+```
+
+Note: The following variables are measured on an ordinal scale:
+
+* Org size
+
+* Org levels
+
+* Org centrality
+
+* Salary
+
+* Age
+
+* Education
+
+Use Spearman's rho for these variables.
+
+****
+
+## Spearman Correlations for Ordinal Demographic Variables
+```{r}
+source("corstars.R")
+
+dat %>%
+  select(orgdehum, exploitatt, wbatt, sblm, soe, jobsat, acommit, burnout, tointent, perf, ocb, cwb, selection, training, appraisal, compensation, hrpractices, orgtype, orgsize, orglevels, orgcent, gender, age, racenum, english, edu, status, orgtenure, postenure, suptenure, dirreport, weekhours, salary) %>%
+  as.matrix(.) %>%
+  corstars(., method = "spearman")
+```
+
+Several interesting observations:
+
+* For-profit organizations significantly related to higher exploitation HR attributions, BLM, and org dehumanization.
+
+* Org size positively related to performance HR attributions & OCB and negatively related to BLM.
+
+* Org levels positivley related to exploitation & cost HR attributions and negatively related to SOE & POS. Also positively related to both OCBs and CWBs.
+
+* Salary negatively related to exploitation & cost HR attributions, BLM , & org dehumanization and positivley related to well-being attributions and POS.
+
+* Being responsible for direct reports positively related to well-being HR attributions and negatively related to org dehumanization.
+
+* Tenure variables and weekly hours not related to variables of interest.
+
+* Status, gender, and age not related to variables of interest.
+
+****
+
+# Hypothesis Tests
+
+****
+
+## Hypothesis 1
+
+> Employee HR attributions are related to employee perceptions of organizational dehumanization. Specifically, (a) employees who tend to make employee-centric attributions perceive low levels of dehumanization whereas (b) employees who tend to make organizationcentric attributions perceive high levels of dehumanization.
+
+```{r}
+cor.test(dat$wbatt, dat$orgdehum, method = "pearson")
+```
+
+```{r}
+cor.test(dat$exploitatt, dat$orgdehum, method = "pearson")
+```
+
+Hypothesis 1 is supported.
+
+```{r}
+dat %>%
+  ggplot(aes(x = wbatt, y = orgdehum)) + geom_point() + geom_smooth(method = "lm") +
+  scale_x_continuous("Employee-centric HR Attributions", breaks = c(1:7)) +
+  scale_y_continuous("Organizaitonal Dehumanization", breaks = c(1:7))
+```
+
+```{r}
+dat %>%
+  ggplot(aes(x = exploitatt, y = orgdehum)) + geom_point() + geom_smooth(method = "lm") +
+  scale_x_continuous("Organization-centric HR Attributions", breaks = c(1:7)) +
+  scale_y_continuous("Organizaitonal Dehumanization", breaks = c(1:7))
+```
+
+Since previous data exploration revealed that variables of interest are non-normally distributed, conduct two additional tests to affirm results:
+
+* Kendall's tau-b
+
+* Visual inspection of regression diagnostic plots
+
+```{r}
+cor.test(dat$wbatt, dat$orgdehum, method = "kendall")
+cor.test(dat$exploitatt, dat$orgdehum, method = "kendall")
+```
+
+```{r}
+plot(lm(orgdehum ~ exploitatt, data = dat))
+```
+
+```{r}
+plot(lm(orgdehum ~ wbatt, data = dat))
+```
+
+Kendall's tau aligns with Pearson's r and no significant abnormalities spotted in the diagnostic plots.
+
+Plot 1 (Residausl vs Fitted) examines linearity.
+
+Plot 2 (Normal Q-Q) examines normality of residuals.
+
+Plot 3 (Scale-Location) examines heterscedasticity.
+
+Plot 4 (Residuals vs Leverage) examines Cook's distance.
+
+
+****
+
+## Hypothesis 2
+
+> Supervisor bottom-line mentality is positively related to employee perceptions of organizational dehumanization.
+
+```{r}
+cor.test(dat$sblm, dat$orgdehum, method = "pearson")
+```
+
+Hypothesis 2 is supported. 
+
+```{r}
+dat %>%
+  ggplot(aes(x = sblm, y = orgdehum)) + geom_point() + geom_smooth(method = "lm") +
+  scale_x_continuous("Supervisor's Bottom-line Mentality", breaks = c(1:7)) +
+  scale_y_continuous("Organizaitonal Dehumanization", breaks = c(1:7))
+```
+
+```{r}
+cor.test(dat$sblm, dat$orgdehum, method = "kendall")
+```
+
+```{r}
+plot(lm(orgdehum ~ sblm, data = dat))
+```
+
+****
+
+## Hypothesis 3
+
+> Supervisor bottom-line mentality is related to HR attributions such that (a) employees with high BLM supervisors are more likely to form organization-centric attributions and (b) employees with low BLM supervisors are more likely to form employee-centric attributions.
+
+```{r}
+cor.test(dat$sblm, dat$exploitatt, method = "pearson")
+```
+
+```{r}
+cor.test(dat$sblm, dat$wbatt, method = "pearson")
+```
+
+Hypothesis 3 is supported.
+
+```{r}
+dat %>%
+  ggplot(aes(x = sblm, y = exploitatt)) + geom_point() + geom_smooth(method = "lm") +
+  scale_x_continuous("Supervisor's Bottom-line Mentality", breaks = c(1:7)) +
+  scale_y_continuous("Organization-centric HR Attributions", breaks = c(1:7))
+```
+
+```{r}
+dat %>%
+  ggplot(aes(x = sblm, y = wbatt)) + geom_point() + geom_smooth(method = "lm") +
+  scale_x_continuous("Supervisor's Bottom-line Mentality", breaks = c(1:7)) +
+  scale_y_continuous("Employee-centric HR Attributions", breaks = c(1:7))
+```
+
+```{r}
+cor.test(dat$sblm, dat$exploitatt, method = "kendall")
+cor.test(dat$sblm, dat$wbatt, method = "kendall")
+```
+
+```{r}
+plot(lm(exploitatt ~ sblm, data = dat))
+```
+
+```{r}
+plot(lm(wbatt ~ sblm, data = dat))
+```
+
+****
+
+## Hypothesis 4
+
+> Supervisor bottom-line mentality has a positive indirect effect on employee perceptions of organizational dehumanization through HR attributions. Specifically, supervisor BLM relates to organizational dehumanization through its (a) positive effect on organizationcentric attributions and (b) negative effect on employee-centric attributions.
+
+```{r}
+summary(lm(exploitatt ~ sblm, data = dat))
+```
+
+```{r}
+summary(mediate(orgdehum ~ sblm + (exploitatt), data = dat, n.iter = 10000, zero = TRUE), digits = 4)
+```
+
+Confirming the F-statistic can be calculate for later.
+```{r}
+df1 <- k <-  length(c("b", "c"))
+n <- 400
+df2 <- n - k
+r2 <- .6024
+fstat <- (r2/(1-r2))*(df2/df1)
+
+data.frame("F-statistic" = fstat, "df1" = df1, "df2" = df2)
+```
+
+
+```{r}
+summary(lm(wbatt ~ sblm, data = dat))
+```
+
+```{r}
+summary(mediate(orgdehum ~ sblm + (wbatt), data = dat, n.iter = 10000, zero = TRUE), digits = 4)
+```
+
+Confirming the F-statistic can be calculate for later.
+```{r}
+df1 <- k <-  length(c("b", "c"))
+n <- 400
+df2 <- n - k
+r2 <- .5979
+fstat <- (r2/(1-r2))*(df2/df1)
+
+data.frame("F-statistic" = fstat, "df1" = df1, "df2" = df2)
+```
+
+Since the psych::mediate function appears to only calculate percentile bootstraps and not bias-corrected bootstraps, rerun analysis in lavaan.
+
+```{r}
+indirect.exploit <- '
+  # direct effect
+    orgdehum ~ c*sblm
+  # mediator
+    exploitatt ~ a*sblm
+    orgdehum ~ b*exploitatt
+  # indirect effect
+    ab := a*b'
+
+indirect.exploit.fit <- sem(indirect.exploit, data = dat, se = "boot", bootstrap = 10000, meanstructure = TRUE)
+parameterEstimates(indirect.exploit.fit, boot.ci.type = "perc")
+parameterEstimates(indirect.exploit.fit, boot.ci.type = "bca.simple")
+```
+
+```{r}
+summary(indirect.exploit.fit, standardized = FALSE)
+```
+
+Calculating the F-statistic
+```{r}
+df1 <- k <-  length(c("b", "c"))
+n <- nobs(indirect.exploit.fit)
+df2 <- n - k
+r2 <- inspect(indirect.exploit.fit, "rsquare")[[1]]
+fstat <- (r2/(1-r2))*(df2/df1) # F-statistic
+
+data.frame("F-statistic" = fstat, "df1" = df1, "df2" = df2)
+```
+
+```{r}
+indirect.wb <- '
+  # direct effect
+    orgdehum ~ c*sblm
+  # mediator
+    wbatt ~ a*sblm
+    orgdehum ~ b*wbatt
+  # indirect effect
+    ab := a*b'
+
+indirect.wb.fit <- sem(indirect.wb, data = dat, se = "boot", bootstrap = 10000, meanstructure = TRUE)
+parameterEstimates(indirect.wb.fit, boot.ci.type = "perc")
+parameterEstimates(indirect.wb.fit, boot.ci.type = "bca.simple")
+```
+
+```{r}
+summary(indirect.wb.fit, standardized = FALSE)
+```
+
+Calculating the F-statistic
+```{r}
+df1 <- k <-  length(c("b", "c"))
+n <- nobs(indirect.wb.fit)
+df2 <- n - k
+r2 <- inspect(indirect.wb.fit, "rsquare")[[1]]
+fstat <- (r2/(1-r2))*(df2/df1) # F-statistic
+
+data.frame("F-statistic" = fstat, "df1" = df1, "df2" = df2)
+```
+
+Hypothesis 4 is supported.
+
+## Hypothesis 5
+
+> Supervisor organizational embodiment moderates the positive relationship between supervisor bottom-line mentality and employee perceptions of organizational dehumanization. Specifically, the relationship between supervisor BLM and organizational dehumanization should be more (less) positive at high (low) levels of supervisor organizational embodiment.
+
+```{r}
+summary(lm(orgdehum ~ sblmc*soec, data = dat))
+```
+
+### Plot Interaction (Factor Predictor)
+```{r}
+mod1 <- lm(orgdehum ~ sblmc*soec, data = dat)
+inter.sd <- effect(c("sblmc*soec"), mod1,
+                     xlevels = list(sblmc = c(-sd(dat$sblmc), +sd(dat$sblmc)),
+                                  soec = c(-sd(dat$soec), +sd(dat$soec))))
+inter.sd <- as.data.frame(inter.sd)
+
+# Create factors of the different variables
+inter.sd$sblm <- factor(inter.sd$sblmc,
+                      levels = c(-sd(dat$sblmc), +sd(dat$sblmc)),
+                      labels = c("-1 SD SBLM", "+ 1 SD SBLM"))
+                     
+inter.sd$soe <- factor(inter.sd$soec,
+              levels = c(-sd(dat$soe), +sd(dat$soec)),
+              labels = c("-1 SD SOE", "+1 SD SOE"))
+
+# Plot 
+ggplot(data = inter.sd, aes(x = sblm, y = fit, group = soe, shape = soe, linetype = soe)) +
+      geom_point(size = 3) + geom_line(size = 1) +
+      scale_linetype_manual(values = c("dashed", "solid")) +
+      scale_shape_manual(values = c(17, 16)) +
+      scale_x_discrete("Supervisor's Bottom-Line Mentality") +
+      scale_y_continuous("Organizational Dehumanization", limits = c(1, 7), breaks = c(1:7)) +
+      guides(shape = guide_legend(title = NULL, reverse = TRUE, keywidth = 5),
+             linetype = guide_legend(title = NULL, reverse = TRUE, keywidth = 5)) +
+      theme(text = element_text(size = 13))
+```
+
+### Plot Interaction (Continuous Predictor)
+```{r}
+rm(mod1)
+rm(inter.sd)
+
+mod1 <- lm(orgdehum ~ sblm*soe, data = dat)
+inter.sd <- effect(c("sblm*soe"), mod1,
+                   xlevels = list(sblm = c(1:7),
+                                  soe = c(mean(dat$soe)-sd(dat$soe), 
+                                          mean(dat$soe)+sd(dat$soe))))
+inter.sd <- as.data.frame(inter.sd)
+
+# Create factors of the moderator
+
+inter.sd$soe <- factor(inter.sd$soe,
+                       levels = c(mean(dat$soe)-sd(dat$soe), mean(dat$soe)+sd(dat$soec)),
+                       labels = c("-1 SD SOE", "+1 SD SOE"))
+
+# Plot 
+ggplot(data = inter.sd, aes(x = sblm, y = fit, group = soe, linetype = soe)) +
+  geom_line(size = 1) +
+  scale_linetype_manual(values = c("dashed", "solid")) +
+  scale_x_continuous("Supervisor's Bottom-Line Mentality", limits = c(1, 7), breaks = c(1:7)) +
+  scale_y_continuous("Organizational Dehumanization", limits = c(1, 7), breaks = c(1:7)) +
+  guides(shape = guide_legend(title = NULL, reverse = TRUE, keywidth = 5),
+         linetype = guide_legend(title = NULL, reverse = TRUE, keywidth = 5)) +
+  theme(text = element_text(size = 13))
+```
+
+### Obtaining MSE for Reporting
+```{r}
+c(crossprod(mod1$residuals))/length(mod1$residuals)
+```
+
+Hypothesis 5 is supported.
+
+* Notably, SOE exhibits a negative main effect on organizational dehumanization.
+
+## Hypothesis 6
+
+> Supervisor’s organizational embodiment moderates the relationship between supervisor bottom-line mentality and employee HR attributions. Specifically, high (low) supervisor BLM is more strongly related to organization-centric (employee-centric) HR attributions at high levels of supervisor’s organizational embodiment.
+
+```{r}
+summary(lm(exploitatt ~ sblmc*soec, data = dat))
+```
+
+### Organization-Centric HR Attributions
+
+#### Plot Interaction (Factor Predictor)
+```{r}
+rm(inter.sd)
+
+mod2 <- lm(exploitatt ~ sblmc*soec, data = dat)
+inter.sd <- effect(c("sblmc*soec"), mod2,
+                     xlevels = list(sblmc = c(-sd(dat$sblmc), +sd(dat$sblmc)),
+                                  soec = c(-sd(dat$soec), +sd(dat$soec))))
+inter.sd <- as.data.frame(inter.sd)
+
+# Create factors of the different variables
+inter.sd$sblm <- factor(inter.sd$sblmc,
+                      levels = c(-sd(dat$sblmc), sd(dat$sblmc)),
+                      labels = c("-1 SD SBLM", "+ 1 SD SBLM"))
+                     
+inter.sd$soe <- factor(inter.sd$soec,
+              levels = c(-sd(dat$soec), sd(dat$soec)),
+              labels = c("-1 SD SOE", "+1 SD SOE"))
+
+# Plot 
+ggplot(data = inter.sd, aes(x = sblm, y = fit, group = soe, shape = soe, linetype = soe)) +
+      geom_point(size = 3) + geom_line(size = 1) +
+      scale_linetype_manual(values = c("dashed", "solid")) +
+      scale_shape_manual(values = c(17, 16)) +      
+      scale_x_discrete("Supervisor's Bottom-Line Mentality") +
+      scale_y_continuous("Organization-centric HR Attributions", limits = c(1, 7), breaks = c(1:7)) +
+      guides(shape = guide_legend(title = NULL, reverse = TRUE, keywidth = 5),
+             linetype = guide_legend(title = NULL, reverse = TRUE, keywidth = 5)) +
+      theme(text = element_text(size = 13))
+```
+
+#### Plot Interaction (Continuous Predictor)
+```{r}
+rm(mod2)
+rm(inter.sd)
+
+mod2 <- lm(exploitatt ~ sblm*soe, data = dat)
+inter.sd <- effect(c("sblm*soe"), mod2,
+                   xlevels = list(sblm = c(1:7),
+                                  soe = c(mean(dat$soe)-sd(dat$soe), 
+                                          mean(dat$soe)+sd(dat$soe))))
+inter.sd <- as.data.frame(inter.sd)
+
+# Create factors of the moderator
+
+inter.sd$soe <- factor(inter.sd$soe,
+                       levels = c(mean(dat$soe)-sd(dat$soe), mean(dat$soe)+sd(dat$soec)),
+                       labels = c("-1 SD SOE", "+1 SD SOE"))
+
+# Plot 
+ggplot(data = inter.sd, aes(x = sblm, y = fit, group = soe, linetype = soe)) +
+  geom_line(size = 1) +
+  scale_linetype_manual(values = c("dashed", "solid")) +
+  scale_x_continuous("Supervisor's Bottom-Line Mentality", limits = c(1, 7), breaks = c(1:7)) +
+  scale_y_continuous("Organization-Centric HR Attributions", limits = c(1, 7), breaks = c(1:7)) +
+  guides(shape = guide_legend(title = NULL, reverse = TRUE, keywidth = 5),
+         linetype = guide_legend(title = NULL, reverse = TRUE, keywidth = 5)) +
+  theme(text = element_text(size = 13))
+```
+
+#### Obtaining MSE for Reporting
+```{r}
+c(crossprod(mod2$residuals))/length(mod2$residuals)
+```
+
+### Employee-Centric HR Attributions
+```{r}
+summary(lm(wbatt ~ sblmc*soec, data = dat))
+```
+
+#### Plot Interaction (Factor Predictor)
+```{r}
+rm(inter.sd)
+
+mod3 <- lm(wbatt ~ sblmc*soec, data = dat)
+inter.sd <- effect(c("sblmc*soec"), mod3,
+                     xlevels = list(sblmc = c(-sd(dat$sblmc), +sd(dat$sblmc)),
+                                  soec = c(-sd(dat$soec), +sd(dat$soec))))
+inter.sd <- as.data.frame(inter.sd)
+
+# Create factors of the different variables
+inter.sd$sblm <- factor(inter.sd$sblmc,
+                      levels = c(-sd(dat$sblmc), sd(dat$sblmc)),
+                      labels = c("-1 SD SBLM", "+ 1 SD SBLM"))
+                     
+inter.sd$soe <- factor(inter.sd$soec,
+              levels = c(-sd(dat$soec), sd(dat$soec)),
+              labels = c("-1 SD SOE", "+1 SD SOE"))
+
+# Plot 
+ggplot(data = inter.sd, aes(x = sblm, y = fit, group = soe, shape = soe, linetype = soe)) +
+      geom_point(size = 3) + geom_line(size = 1) +
+      scale_linetype_manual(values = c("dashed", "solid")) +
+      scale_shape_manual(values = c(17, 16)) +
+      scale_x_discrete("Supervisor's Bottom-Line Mentality") +
+      scale_y_continuous("Employee-centric HR Attributions", limits = c(1, 7), breaks = c(1:7)) +
+      guides(shape = guide_legend(title = NULL, reverse = TRUE, keywidth = 5),
+             linetype = guide_legend(title = NULL, reverse = TRUE, keywidth = 5)) +
+      theme(text = element_text(size = 13))
+```
+
+#### Plot Interaction (Continuous Predictor)
+```{r}
+rm(mod3)
+rm(inter.sd)
+
+mod3 <- lm(wbatt ~ sblm*soe, data = dat)
+inter.sd <- effect(c("sblm*soe"), mod3,
+                   xlevels = list(sblm = c(1:7),
+                                  soe = c(mean(dat$soe)-sd(dat$soe), 
+                                          mean(dat$soe)+sd(dat$soe))))
+inter.sd <- as.data.frame(inter.sd)
+
+# Create factors of the moderator
+
+inter.sd$soe <- factor(inter.sd$soe,
+                       levels = c(mean(dat$soe)-sd(dat$soe), mean(dat$soe)+sd(dat$soec)),
+                       labels = c("-1 SD SOE", "+1 SD SOE"))
+
+# Plot 
+ggplot(data = inter.sd, aes(x = sblm, y = fit, group = soe, linetype = soe)) +
+  geom_line(size = 1) +
+  scale_linetype_manual(values = c("dashed", "solid")) +
+  scale_x_continuous("Supervisor's Bottom-Line Mentality", limits = c(1, 7), breaks = c(1:7)) +
+  scale_y_continuous("Employee-Centric HR Attributions", limits = c(1, 7), breaks = c(1:7)) +
+  guides(shape = guide_legend(title = NULL, reverse = TRUE, keywidth = 5),
+         linetype = guide_legend(title = NULL, reverse = TRUE, keywidth = 5)) +
+  theme(text = element_text(size = 13))
+```
+
+#### Obtaining MSE for Reporting
+```{r}
+c(crossprod(mod3$residuals))/length(mod3$residuals)
+```
+
+Hypothesis 6 is partially supported.
+
+* Supported for organization-centric attributions.
+
+* Not supported for employee-centric attributions.
+
+* Notably, SOE appears to exhibit a substantial main effect. SOE positively impacts employee-centric attributions and negatively impacts organization-centric attributions.
+
+## Hypothesis 7
+
+> Supervisor’s organizational embodiment moderates the positive indirect effect of supervisor bottom-line mentality on employee perceptions of organizational dehumanization through HR attributions. Specifically, the indirect effect of supervisor BLM on organizational dehumanization is more positive at high levels of supervisor’s organizational embodiment.
+
+### Using psych::mediate
+
+```{r}
+summary(mediate(orgdehum ~ sblm*soe + (exploitatt), data = dat, n.iter = 10000, zero = TRUE), digits = 4)
+```
+
+```{r}
+summary(mediate(orgdehum ~ sblm*soe + (wbatt), data = dat, n.iter = 10000, zero = TRUE), digits = 4)
+```
+
+The psych::mediate function does not appear appropriate for this analysis as it includes an estimate of the interaction term on the outcome variable (c'3). This appears to be an analysis for Model 8 of Process, not Model 7.
+
+### Using lavaan::sem
+
+Need to manually create interaction term for lavaan.
+```{r}
+dat %<>%
+  mutate(sblmxsoe = sblm*soe) %>% # Uncentered
+  mutate(sblmcxsoec = sblmc*soec) # Centered
+```
+
+```{r}
+summary(lm(exploitatt ~ sblmc*soec, data = dat))
+```
+
+```{r}
+df1 <- k <-  length(c("a1", "a2", "a3"))
+n <- 400
+df2 <- n - k
+r2 <- .394
+fstat <- (r2/(1-r2))*(df2/df1) # F-statistic
+
+data.frame("F-statistic" = fstat, "df1" = df1, "df2" = df2)
+```
+
+```{r}
+condindirect.exploit <- '
+  # direct effect
+    orgdehum ~ c*sblmc
+  # mediator
+    exploitatt ~ a1*sblmc + a2*soec + a3*sblmcxsoec
+    orgdehum ~ b*exploitatt
+  # indirect effect (index of moderated mediation)
+    ab := a3*b
+  # total effect
+    total := c + (a1 + a2 + a3)*b
+'
+    
+condindirect.exploit.fit <- sem(condindirect.exploit, data = dat, se = "boot", bootstrap = 10000, meanstructure = TRUE)
+parameterEstimates(condindirect.exploit.fit, boot.ci.type = "perc")
+parameterEstimates(condindirect.exploit.fit, boot.ci.type = "bca.simple")
+```
+
+```{r}
+condindirect.exploit2 <- '
+  # direct effect
+    orgdehum ~ c*sblmc
+  # mediator
+    exploitatt ~ a1*sblmc + a2*soec + a3*sblmcxsoec
+    orgdehum ~ b*exploitatt
+  # indirect effect (index of moderated mediation)
+    ab := a3*b
+  # total effect
+    total := c + (a1 + a2 + a3)*b
+
+  # mean of centered SOE (for simple slopes)
+    soec ~ soec.mean*1
+  # variance of centered SOE (for simple slopes)
+    soec ~~ soec.var*soec
+  # indirect effects conditional on moderator (a1 + a3*a2.value)*b
+    indirect.SDbelow := a1*b + a3*b*(-sqrt(soec.var))
+    indirect.mean := a1*b + a3*soec.mean*b
+    indirect.SDabove := a1*b + a3*b*(sqrt(soec.var))
+'
+ 
+condindirect.exploit.fit2 <- sem(condindirect.exploit2, data = dat, se = "boot", bootstrap = 10000, meanstructure = TRUE)
+parameterEstimates(condindirect.exploit.fit2, boot.ci.type = "perc")
+parameterEstimates(condindirect.exploit.fit2, boot.ci.type = "bca.simple")
+```
+
+
+```{r}
+summary(condindirect.exploit.fit, standardized = FALSE)
+```
+
+```{r}
+inspect(condindirect.exploit.fit, "rsquare")
+```
+
+Calculating F
+```{r}
+df1 <- k <-  length(c("b", "c"))
+n <- nobs(condindirect.exploit.fit)
+df2 <- n - k
+r2 <- inspect(condindirect.exploit.fit, "rsquare")[[1]]
+fstat <- (r2/(1-r2))*(df2/df1) # F-statistic
+
+data.frame("F-statistic" = fstat, "df1" = df1, "df2" = df2)
+```
+
+#### Probing the Conditional Indirect Effect
+```{r}
+w <- c(-sd(dat$soec), 0, +sd(dat$soec))
+a1 <- coef(condindirect.exploit.fit)[["a1"]]
+a3 <- coef(condindirect.exploit.fit)[["a3"]]
+b <- coef(condindirect.exploit.fit)[["b"]]
+condindirect.probe <- data.frame(w, a1, a3, b)
+
+condindirect.probe %>%
+  rowwise() %>%
+  mutate(thetaxm = a1 + a3*w) %>%
+  mutate(indirect = thetaxm*b)
+```
+
+Results appear to match the ones above.
+
+> a3b is the difference between the conditional indirect effects between groups of people that differ by one unit in the moderator (Hayes, 2017, p. 453)
+
+```{r}
+summary(lm(wbatt ~ sblmc*soec, data = dat))
+```
+
+```{r}
+condindirect.wb <- '
+  # direct effect
+    orgdehum ~ c*sblmc
+  # mediator
+    wbatt ~ a1*sblmc + a2*soec + a3*sblmcxsoec
+    orgdehum ~ b*wbatt
+  # indirect effect (index of moderated mediation)
+    ab := a3*b
+  # total effect
+    total := c + (a1 + a2 + a3)*b
+'
+    
+condindirect.wb.fit <- sem(condindirect.wb, data = dat, se = "boot", bootstrap = 10000, meanstructure = TRUE)
+parameterEstimates(condindirect.wb.fit, boot.ci.type = "perc")
+parameterEstimates(condindirect.wb.fit, boot.ci.type = "bca.simple")
+```
+
+```{r}
+summary(condindirect.wb.fit, standardized = FALSE)
+```
+
+
+```{r}
+inspect(condindirect.wb.fit, "rsquare")
+```
+
+Calculating F
+```{r}
+df1 <- k <-  length(c("b", "c"))
+n <- nobs(condindirect.wb.fit)
+df2 <- n - k
+r2 <- inspect(condindirect.wb.fit, "rsquare")[[1]]
+fstat <- (r2/(1-r2))*(df2/df1) # F-statistic
+
+data.frame("F-statistic" = fstat, "df1" = df1, "df2" = df2)
+```
+
+Hypothesis 7 is partially supported.
+
+* Supported for organization-centric attributions. Note: effect is quite small.
+
+* Not supported for employee-centric attributions.
+
+## Hypothesis 8
+
+> Organizational dehumanization is negatively related to job satisfaction.
+
+```{r}
+cor.test(dat$orgdehum, dat$jobsat, method = "pearson")
+```
+
+Hypothesis 8 is supported.
+
+```{r}
+dat %>%
+  ggplot(aes(x = orgdehum, y = jobsat)) + geom_point() + geom_smooth(method = "lm") +
+  scale_x_continuous("Organizational Dehumanization", breaks = c(1:7)) +
+  scale_y_continuous("Job Satisfaction", breaks = c(1:7))
+```
+
+```{r}
+cor.test(dat$orgdehum, dat$jobsat, method = "kendall")
+```
+
+```{r}
+plot(lm(jobsat ~ orgdehum, data = dat))
+```
+
+Diagnostic plots generally looks fine, although the scale-location plot indicates slight heteroscedasticity.
+
+## Hypothesis 9
+
+> Organizational dehumanization is negatively related to affective commitment.
+
+```{r}
+cor.test(dat$orgdehum, dat$acommit, method = "pearson")
+```
+
+Hypothesis 9 is supported.
+
+```{r}
+dat %>%
+  ggplot(aes(x = orgdehum, y = acommit)) + geom_point() + geom_smooth(method = "lm") +
+  scale_x_continuous("Organizational Dehumanization", breaks = c(1:7)) +
+  scale_y_continuous("Affective Commitment", breaks = c(1:7))
+```
+
+```{r}
+cor.test(dat$orgdehum, dat$acommit, method = "kendall")
+```
+
+```{r}
+plot(lm(acommit ~ orgdehum, data = dat))
+```
+
+
+## Hypothesis 10
+
+> Organizational dehumanization is positively related to turnover intentions.
+
+```{r}
+cor.test(dat$orgdehum, dat$tointent, method = "pearson")
+```
+
+Hypothesis 10 is supported.
+
+```{r}
+dat %>%
+  ggplot(aes(x = orgdehum, y = tointent)) + geom_point() + geom_smooth(method = "lm") +
+  scale_x_continuous("Organizational Dehumanization", breaks = c(1:7)) +
+  scale_y_continuous("Turnover Intentions", breaks = c(1:7))
+```
+
+```{r}
+cor.test(dat$orgdehum, dat$tointent, method = "kendall")
+```
+
+```{r}
+plot(lm(tointent ~ orgdehum, data = dat))
+```
+
+
+## Hypothesis 11
+
+> Organizational dehumanization is positively related to burnout.
+
+```{r}
+cor.test(dat$orgdehum, dat$burnout, method = "pearson")
+```
+
+Hypothesis 11 is supported.
+
+```{r}
+dat %>%
+  ggplot(aes(x = orgdehum, y = burnout)) + geom_point() + geom_smooth(method = "lm") +
+  scale_x_continuous("Organizational Dehumanization", breaks = c(1:7)) +
+  scale_y_continuous("Burnout", breaks = c(1:7))
+```
+
+```{r}
+cor.test(dat$orgdehum, dat$burnout, method = "kendall")
+```
+
+```{r}
+plot(lm(burnout ~ orgdehum, data = dat))
+```
+
+### Burnout Dimensions
+
+```{r}
+cor.test(dat$orgdehum, dat$diseng, method = "pearson")
+cor.test(dat$orgdehum, dat$exhaust, method = "pearson")
+```
+
+## Hypothesis 12
+
+> Organizational dehumanization is negatively related to task performance.
+
+```{r}
+cor.test(dat$orgdehum, dat$perf, method = "pearson")
+```
+
+Hypothesis 12 is supported.
+
+```{r}
+dat %>%
+  ggplot(aes(x = orgdehum, y = perf)) + geom_point() + geom_smooth(method = "lm") +
+  scale_x_continuous("Organizational Dehumanization", breaks = c(1:7)) +
+  scale_y_continuous("Task Performance", breaks = c(1:7))
+```
+
+However, the scatterplot indicates the variables do not have a bivariate normal distribution.
+
+```{r}
+cor.test(dat$orgdehum, dat$perf, method = "kendall")
+```
+
+```{r}
+plot(lm(perf ~ orgdehum, data = dat))
+```
+
+Q-Q plot indicates non-normality of residuals.
+
+## Hypothesis 13
+
+> Organizational dehumanization is negatively related to organizational citizenship behaviors.
+
+```{r}
+cor.test(dat$orgdehum, dat$ocb, method = "pearson")
+```
+
+Hypothesis 13 is not supported.
+
+```{r}
+dat %>%
+  ggplot(aes(x = orgdehum, y = ocb)) + geom_point() + geom_smooth(method = "lm") +
+  scale_x_continuous("Organizational Dehumanization", breaks = c(1:7)) +
+  scale_y_continuous("Organizaitonal Citizenship Behaviors", breaks = c(1:7))
+```
+
+```{r}
+cor.test(dat$orgdehum, dat$ocb, method = "kendall")
+```
+
+```{r}
+plot(lm(ocb ~ orgdehum, data = dat))
+```
+
+## Hypothesis 14
+
+> Organizational dehumanization is positively related to counterproductive work behaviors.
+
+```{r}
+cor.test(dat$orgdehum, dat$cwb, method = "pearson")
+```
+
+Hypothesis 14 is supported.
+
+```{r}
+dat %>%
+  ggplot(aes(x = orgdehum, y = cwb)) + geom_point() + geom_smooth(method = "lm") +
+  scale_x_continuous("Organizational Dehumanization", breaks = c(1:7)) +
+  scale_y_continuous("Counterproductive Work Behaviors", breaks = c(1:7))
+```
+
+```{r}
+cor.test(dat$orgdehum, dat$cwb, method = "kendall")
+```
+
+```{r}
+plot(lm(cwb ~ orgdehum, data = dat))
+```
+
+****
+
+# Regressions with Controls
+
+* Bolster correlation results with regression analyses including control variables
+* Include demographic variables that were significantly correlate with focal variables:
+    - orgtype
+    - orglevels
+    - edu
+    - dirreport
+    - salary
+    
+## Hypothesis 1
+```{r}
+mod1 <- lm(orgdehum ~ wbatt + orgtype + orglevels + edu + dirreport + salary + hrpractices, data = dat)
+summary(mod1)
+```
+
+```{r}
+mod2 <- lm(orgdehum ~ exploitatt + orgtype + orglevels + edu + dirreport + salary + hrpractices, data = dat)
+summary(mod2)
+```
+
+## Hypothesis 2
+```{r}
+mod3 <- lm(orgdehum ~ sblm + orgtype + orglevels + edu + dirreport + salary + hrpractices, data = dat)
+summary(mod3)
+```
+
+## Hypothesis 3
+```{r}
+mod4 <- lm(exploitatt ~ sblm + orgtype + orglevels + edu + dirreport + salary + hrpractices, data = dat)
+summary(mod4)
+```
+
+```{r}
+mod5 <- lm(wbatt ~ sblm + orgtype + orglevels + edu + dirreport + salary + hrpractices, data = dat)
+summary(mod5)
+```
+
+## All Predictors
+```{r}
+mod6 <- lm(orgdehum ~ sblm + exploitatt + wbatt + orgtype + orglevels + edu + dirreport + salary + hrpractices, data = dat)
+summary(mod6)
+```
+
+Regression analyses indicate that predictors of interest predict organzational dehumanization even after controlling for covariates and each other.
+
+****
+
+# Supplemental Analyses: CFA of Core Constructs
+## Single Factor
+```{r}
+cfa.model <- '
+  # measurement model
+    factor =~ sblm_1 + sblm_2 + sblm_3 + sblm_4 + exploit_1 + exploit_2 + exploit_3 + wbatt_1 + wbatt_2 + wbatt_3 + orgdehum_1 + orgdehum_2 + orgdehum_3 + orgdehum_4 + orgdehum_5 + orgdehum_6 + orgdehum_7 + orgdehum_8 + orgdehum_9 + orgdehum_10 + orgdehum_11
+'
+cfa.fit <- cfa(cfa.model, data = dat)
+summary(cfa.fit, fit.measures = TRUE, standardized = TRUE)
+```
+
+* Poor fit
+
+```{r}
+library(semPlot)
+semPaths(cfa.fit, what = "paths", whatLabels = "std")
+```
+
+## Two Factor
+```{r}
+cfa.model <- '
+  # measurement model
+    factor1 =~ sblm_1 + sblm_2 + sblm_3 + sblm_4 + exploit_1 + exploit_2 + exploit_3 + orgdehum_1 + orgdehum_2 + orgdehum_3 + orgdehum_4 + orgdehum_5 + orgdehum_6 + orgdehum_7 + orgdehum_8 + orgdehum_9 + orgdehum_10 + orgdehum_11
+    factor2 =~ wbatt_1 + wbatt_2 + wbatt_3
+'
+cfa.fit <- cfa(cfa.model, data = dat, estimator = "MLR")
+summary(cfa.fit, fit.measures = TRUE, standardized = TRUE)
+```
+
+* Poor fit
+
+```{r}
+semPaths(cfa.fit, what = "paths", whatLabels = "std")
+```
+
+## First Order Factors
+```{r}
+cfa.model <- '
+  # measurement model
+    blm =~ sblm_1 + sblm_2 + sblm_3 + sblm_4
+    exploit =~ exploit_1 + exploit_2 + exploit_3
+    wb =~ wbatt_1 + wbatt_2 + wbatt_3
+    odh =~ orgdehum_1 + orgdehum_2 + orgdehum_3 + orgdehum_4 + orgdehum_5 + orgdehum_6 + orgdehum_7 + orgdehum_8 + orgdehum_9 + orgdehum_10 + orgdehum_11
+'
+cfa.fit <- cfa(cfa.model, data = dat, estimator = "MLR")
+summary(cfa.fit, fit.measures = TRUE, standardized = TRUE)
+```
+
+
+```{r}
+semPaths(cfa.fit, what = "paths", whatLabels = "std")
+```
+
+* Better Fit
+
+****
+
+# Supplementa Analyses: Probling the Conditional Indirect Effect
+
+```{r}
+library(lavaan)
+
+# Need to manually create interaction term
+dat %<>%
+  mutate(sblmxsoe = sblm*soe) %>% # Uncentered
+  mutate(sblmcxsoec = sblmc*soec) # Centered
+```
+
+## Conditional Indirect Effect Through Exploit
+```{r}
+condindirect.exploit <- '
+  # direct effect
+    orgdehum ~ c*sblmc
+  # mediator
+    exploitattc ~ a1*sblmc + a2*soec + a3*sblmcxsoec
+    orgdehum ~ b*exploitattc
+  # indirect effect (index of moderated mediation)
+    ab := a3*b
+  # total effect
+    total := c + (a1 + a2 + a3)*b
+  # mean of centered SOE (for simple slopes)
+    soec ~ soec.mean*1
+  # variance of centered SOE (for simple slopes)
+    soec ~~ soec.var*soec
+  # indirect effects conditional on moderator (a1 + a3*a2.value)*b
+    indirect.SDbelow := a1*b + a3*b*-sqrt(soec.var)
+    indirect.mean := a1*b + a3*soec.mean*b
+    indirect.SDabove := a1*b + a3*b*sqrt(soec.var)
+'
+    
+condindirect.exploit.fit <- sem(condindirect.exploit, data = dat, se = "boot", bootstrap = 10000)
+parameterEstimates(condindirect.exploit.fit, boot.ci.type = "bca.simple")
+```
+
+
+## Conditional Indirect Effect Through WB
+```{r}
+condindirect.wb <- '
+  # direct effect
+    orgdehum ~ c*sblmc
+  # mediator
+    wbattc ~ a1*sblmc + a2*soec + a3*sblmcxsoec
+    orgdehum ~ b*wbattc
+  # indirect effect (index of moderated mediation)
+    ab := a3*b
+  # total effect
+    total := c + (a1 + a2 + a3)*b
+  # mean of centered SOE (for simple slopes)
+    soec ~ soec.mean*1
+  # variance of centered SOE (for simple slopes)
+    soec ~~ soec.var*soec
+  # indirect effects conditional on moderator (a1 + a3*a2.value)*b
+    indirect.SDbelow := a1*b + a3*b*-sqrt(soec.var)
+    indirect.mean := a1*b + a3*soec.mean*b
+    indirect.SDabove := a1*b + a3*b*sqrt(soec.var)
+'
+    
+condindirect.wb.fit <- sem(condindirect.wb, data = dat, se = "boot", bootstrap = 10000)
+parameterEstimates(condindirect.wb.fit, boot.ci.type = "bca.simple")
+```
+
+
+# Supplemental Analyses: SOE Moderating Direct Path
+
+```{r}
+condindirect.exploit2 <- '
+  # direct effect
+    orgdehum ~ c1*sblmc + c2*soec + c3*sblmcxsoec
+  # mediator
+    exploitatt ~ a1*sblmc + a2*soec + a3*sblmcxsoec
+    orgdehum ~ b*exploitatt
+  # indirect effect (index of moderated mediation)
+    ab := a3*b
+  # total effect
+    total := c1 + c2 + c3 + (a1 + a2 + a3)*b
+  # mean of centered SOE (for simple slopes)
+    soec ~ soec.mean*1
+  # variance of centered SOE (for simple slopes)
+    soec ~~ soec.var*soec
+  # indirect effects conditional on moderator (a1 + a3*a2.value)*b
+    indirect.SDbelow := a1*b + a3*b*-sqrt(soec.var)
+    indirect.mean := a1*b + a3*soec.mean*b
+    indirect.SDabove := a1*b + a3*b*sqrt(soec.var)
+'
+    
+condindirect.exploit.fit2 <- sem(condindirect.exploit2, data = dat, se = "boot", bootstrap = 10000)
+parameterEstimates(condindirect.exploit.fit2, boot.ci.type = "bca.simple")
+```
+
+The bootstrapped confidence intervals for the index of moderated mediation (a3*b) does not contain 0. Also, the direct moderation effect (c3) appears to be significant as well.
+
+```{r}
+condindirect.wb2 <- '
+  # direct effect
+    orgdehum ~ c1*sblmc + c2*soec + c3*sblmcxsoec
+  # mediator
+    wbatt ~ a1*sblmc + a2*soec + a3*sblmcxsoec
+    orgdehum ~ b*wbatt
+  # indirect effect (index of moderated mediation)
+    ab := a3*b
+  # total effect
+    total := c1 + c2 + c3 + (a1 + a2 + a3)*b
+  # mean of centered SOE (for simple slopes)
+    soec ~ soec.mean*1
+  # variance of centered SOE (for simple slopes)
+    soec ~~ soec.var*soec
+  # indirect effects conditional on moderator (a1 + a3*a2.value)*b
+    indirect.SDbelow := a1*b + a3*b*-sqrt(soec.var)
+    indirect.mean := a1*b + a3*soec.mean*b
+    indirect.SDabove := a1*b + a3*b*sqrt(soec.var)
+'
+    
+condindirect.wb.fit2 <- sem(condindirect.wb2, data = dat, se = "boot", bootstrap = 10000)
+parameterEstimates(condindirect.wb.fit2, boot.ci.type = "bca.simple")
+```
+
+****
+
+# Supplemental Analyses: Parallel Mediation
+```{r}
+indirect.parallel <- '
+  # direct effect
+    orgdehum ~ c*sblm
+  # mediators
+    exploitatt ~ a1*sblm
+    wbatt ~ a2*sblm
+    orgdehum ~ b1*exploitatt + b2*wbatt
+  # indirect effects
+    a1b1 := a1*b1
+    a2b2 := a2*b2
+    total := a1b1 + a2b2
+'
+
+indirect.parallel.fit <- sem(indirect.parallel, data = dat, se = "boot", bootstrap = 10000, meanstructure = TRUE)
+parameterEstimates(indirect.parallel.fit, boot.ci.type = "perc")
+parameterEstimates(indirect.parallel.fit, boot.ci.type = "bca.simple")
+summary(indirect.parallel.fit, standardized = FALSE)
+```
+
+```{r}
+inspect(indirect.parallel.fit, "rsquare")
+```
+
+Calculating F
+```{r}
+df1 <- k <-  length(c("b1", "b2", "c"))
+n <- nobs(indirect.parallel.fit)
+df2 <- n - k
+r2 <- inspect(indirect.parallel.fit, "rsquare")[[1]]
+fstat <- (r2/(1-r2))*(df2/df1) # F-statistic
+
+data.frame("F-statistic" = fstat, "df1" = df1, "df2" = df2)
+```
+
+****
+
+# Supplemental Analyses: Conditional Parallel Mediation (a1 moderated)
+```{r}
+dat %<>%
+  mutate(sblmxsoe = sblm*soe) %>% # Uncentered
+  mutate(sblmcxsoec = sblmc*soec) # Centered
+```
+
+
+```{r}
+cond.parallel <- '
+  # direct effect
+    orgdehum ~ c*sblmc
+  # mediators
+    exploitatt ~ a1*sblmc + a3*soec + a4*sblmcxsoec
+    wbatt ~ a2*sblmc
+    orgdehum ~ b1*exploitatt + b2*wbatt
+  # indirect effects
+    a1b1 := a1*b1
+    a2b2 := a2*b2
+  # index of moderated mediation
+    a4b1 := a4*b1
+  # total indirect effect
+    total := a1b1 + a2b2
+'
+
+cond.parallel.fit <- sem(cond.parallel, data = dat, se = "boot", bootstrap = 10000, meanstructure = TRUE)
+```
+
+```{r}
+parameterEstimates(cond.parallel.fit, boot.ci.type = "perc")
+parameterEstimates(cond.parallel.fit, boot.ci.type = "bca.simple")
+summary(cond.parallel.fit, standardized = FALSE)
+```
+
+```{r}
+inspect(cond.parallel.fit, "rsquare")
+```
+
+Calculating F
+```{r}
+df1 <- k <- length(c("b1", "b2", "c"))
+n <- nobs(cond.parallel.fit)
+df2 <- n - k
+r2 <- inspect(cond.parallel.fit, "rsquare")[[1]]
+fstat <- (r2/(1-r2))*(df2/df1) # F-statistic
+
+data.frame("F-statistic" = fstat, "df1" = df1, "df2" = df2)
+```
+
+## Simple Models for Coefficients
+```{r}
+summary(lm(exploitatt ~ sblm, data = dat))
+```
+
+```{r}
+summary(lm(wbatt ~ sblm, data = dat))
+```
+
+# Supplemental Analyses: Conditional Parallel Mediation (a1 and c' moderated)
+```{r}
+cond.parallel2 <- '
+  # direct effect
+    orgdehum ~ c*sblmc
+  # mediators
+    exploitatt ~ a1*sblmc + a3*soec + a4*sblmcxsoec
+    wbatt ~ a2*sblmc
+    orgdehum ~ b1*exploitatt + b2*wbatt + b3*soec + b4*sblmcxsoec
+  # indirect effects
+    a1b1 := a1*b1
+    a2b2 := a2*b2
+  # index of moderated mediation
+    a4b1 := a4*b1
+  # total indirect effect
+    total := a1b1 + a2b2
+'
+
+cond.parallel.fit2 <- sem(cond.parallel2, data = dat, se = "boot", bootstrap = 10000, meanstructure = TRUE)
+```
+
+```{r}
+parameterEstimates(cond.parallel.fit2, boot.ci.type = "perc")
+parameterEstimates(cond.parallel.fit2, boot.ci.type = "bca.simple")
+summary(cond.parallel.fit2, standardized = FALSE)
+```
+
+```{r}
+inspect(cond.parallel.fit2, "rsquare")
+```
+
+Calculating F
+```{r}
+df1 <- k <- length(c("b1", "b2", "b3", "b4", "c"))
+n <- nobs(cond.parallel.fit2)
+df2 <- n - k
+r2 <- inspect(cond.parallel.fit2, "rsquare")[[1]]
+fstat <- (r2/(1-r2))*(df2/df1) # F-statistic
+
+data.frame("F-statistic" = fstat, "df1" = df1, "df2" = df2)
+```
+
+****
+# Supplemental Analyses: Examining HR Practices
+
+## HR Practices Descriptives
+```{r}
+dat %>%
+  group_by(selection) %>%
+  tally()
+```
+
+Few people experience no selection practices at all.
+
+```{r}
+dat %>%
+  group_by(training) %>%
+  tally()
+```
+
+```{r}
+dat %>%
+  group_by(appraisal) %>%
+  tally()
+```
+
+```{r}
+dat %>%
+  group_by(compensation) %>%
+  tally()
+```
+
+```{r}
+dat %>%
+  group_by(hrpractices) %>%
+  tally()
+```
+
+## HR Practices Correlations
+```{r}
+source("corstars.R")
+
+dat %>%
+  select(hrpractices, selection:compensation, orgdehum, exploitatt:wbatt, sblm, orgdehum, pos) %>%
+  as.matrix(.) %>%
+  corstars(., method = "pearson")
+```
+
+Sum of HR practices generally seems to be related to positive outcomes.
+
+## HR Practice Descriptive: Specific Items
+```{r}
+dat %>%
+  summarise_at(vars(selection_1:compens_3), sum, na.rm = FALSE)
+```
+
+
+## HR Practice Correlations: Specific Items
+```{r}
+source("corstars.R")
+
+dat %>%
+  select(selection_1:compens_3, orgdehum, exploitatt:wbatt, sblm) %>%
+  as.matrix(.) %>%
+  corstars(., method = "pearson")
+```
+
+****
+
+# Supplemental Analyses: Demographic Differences
+
+****
+
+## Region
+```{r}
+dat %>%
+  group_by(region) %>%
+  tally()
+```
+
+
+```{r}
+source("summarySE.R")
+
+dat %>%
+  summarySE(., measurevar = "orgdehum", groupvars = "region", na.rm = TRUE)
+```
+
+```{r}
+summary(aov(orgdehum ~ region, data = dat))
+```
+
+```{r}
+source("summarySE.R")
+
+dat %>%
+  summarySE(., measurevar = "sblm", groupvars = "region", na.rm = TRUE)
+```
+
+```{r}
+summary(aov(sblm ~ region, data = dat))
+```
+
+```{r}
+source("summarySE.R")
+
+dat %>%
+  summarySE(., measurevar = "exploitatt", groupvars = "region", na.rm = TRUE)
+```
+
+```{r}
+summary(aov(exploitatt ~ region, data = dat))
+```
+
+```{r}
+source("summarySE.R")
+
+dat %>%
+  summarySE(., measurevar = "wbatt", groupvars = "region", na.rm = TRUE)
+```
+
+```{r}
+summary(aov(wbatt ~ region, data = dat))
+```
+
+No significant mean differences in variables of interest across regions.
+
+****
+
+## Industry
+```{r}
+source("summarySE.R")
+
+dat %>%
+  summarySE(., measurevar = "orgdehum", groupvars = "industry", na.rm = TRUE)
+```
+
+```{r}
+source("summarySE.R")
+
+dat %>%
+  summarySE(., measurevar = "sblm", groupvars = "industry", na.rm = TRUE)
+```
+
+```{r}
+source("summarySE.R")
+
+dat %>%
+  summarySE(., measurevar = "exploitatt", groupvars = "industry", na.rm = TRUE)
+```
+
+```{r}
+source("summarySE.R")
+
+dat %>%
+  summarySE(., measurevar = "wbatt", groupvars = "industry", na.rm = TRUE)
+```
+
+Note: Very low n-size for certain industries. Consider dropping groups.
+
+Specifically, the following categories have N < 20:
+
+```{r}
+dat %>%
+  group_by(industry) %>%
+  select(industry) %>%
+  count() %>%
+  filter(freq < 20)
+```
+
+### ANOVA (Org Dehumanization)
+Test for homogeneity of variance first. Use the non-parametric Fligner-Killeen Test.
+```{r}
+fligner.test(orgdehum ~ industry, data = dat)
+fligner.test(sblm ~ industry, data = dat)
+fligner.test(exploitatt ~ industry, data = dat)
+fligner.test(wbatt ~ industry, data = dat)
+```
+
+
+```{r}
+summary(aov(orgdehum ~ industry, data = dat))
+```
+
+Significant mean difference in organizational dehumanization between industries.
+
+### Tukey Test (Org Dehumanization)
+```{r}
+tukey.odhindustry <- tidy(TukeyHSD(aov(orgdehum ~ industry, data = dat)))
+
+tukey.odhindustry %>%
+  select(-term) %>%
+  filter(adj.p.value < .05)
+```
+
+None of the groups compared above had N < 20.
+
+### Create labels with capitalized letters for graphing
+```{r}
+dat$industry <- as.factor(dat$industry)
+```
+
+
+### Visualization (Org Dehumanization)
+```{r}
+source("summarySE.R")
+
+dat %>%
+  select(industry, orgdehum) %>%
+  filter(industry %in% c("arts, entertainment, recreation", "accommodation, food services")) %>%
+  group_by(industry) %>%
+  summarySE(., measurevar = "orgdehum", groupvars = "industry", na.rm = TRUE)
+
+dat %>%
+  filter(industry %in% c("arts, entertainment, recreation", "accommodation, food services")) %>%
+  summarySE(., measurevar = "orgdehum", groupvars = "industry", na.rm = TRUE) %>%
+  ggplot(aes(x = industry, y = orgdehum, group = industry, fill = industry)) +
+  geom_bar(stat = "identity", width = 0.3) +
+  scale_fill_grey(start = .4, end = .8) +
+  geom_errorbar(aes(ymin = orgdehum - ci, ymax = orgdehum + ci), size = 0.5, width = 0.07) +
+  scale_x_discrete(labels = c("Accommodation, Food Services", "Arts, Entertainment, Recreation")) +
+  scale_y_continuous(expand = c(0,0), limits = c(0,7), breaks = c(1:7)) +
+  labs(x = "Industry", y = "Organizational Dehumanization") +
+  theme(text = element_text(size = 13)) + guides(fill = FALSE)
+```
+
+```{r}
+source("summarySE.R")
+
+dat %>%
+  select(industry, orgdehum) %>%
+  filter(industry %in% c("finance, insurance", "accommodation, food services")) %>%
+  group_by(industry) %>%
+  summarySE(., measurevar = "orgdehum", groupvars = "industry", na.rm = TRUE)
+
+dat %>%
+  filter(industry %in% c("finance, insurance", "accommodation, food services")) %>%
+  summarySE(., measurevar = "orgdehum", groupvars = "industry", na.rm = TRUE) %>%
+  ggplot(aes(x = industry, y = orgdehum, group = industry, fill = industry)) +
+  scale_fill_grey(start = .4, end = .8) +
+  geom_bar(stat = "identity", width = 0.3) +
+  geom_errorbar(aes(ymin = orgdehum - ci, ymax = orgdehum + ci), size = 0.5, width = 0.07) +
+  scale_x_discrete(labels = c("Accommodation, Food Services", "Finance, Insurance")) +  
+  scale_y_continuous(expand = c(0,0), limits = c(0,7), breaks = c(1:7)) +
+  labs(x = "Industry", y = "Organizational Dehumanization") +
+  theme(text = element_text(size = 13)) + guides(fill = FALSE)
+```
+
+```{r}
+source("summarySE.R")
+
+dat %>%
+  select(industry, orgdehum) %>%
+  filter(industry %in% c("retail trade", "arts, entertainment, recreation")) %>%
+  group_by(industry) %>%
+  summarySE(., measurevar = "orgdehum", groupvars = "industry", na.rm = TRUE)
+
+dat %>%
+  filter(industry %in% c("retail trade", "arts, entertainment, recreation")) %>%
+  summarySE(., measurevar = "orgdehum", groupvars = "industry", na.rm = TRUE) %>%
+  ggplot(aes(x = industry, y = orgdehum, group = industry, fill = industry)) +
+  geom_bar(stat = "identity", width = 0.3) +
+  scale_fill_grey(start = .4, end = .8) +
+  geom_errorbar(aes(ymin = orgdehum - ci, ymax = orgdehum + ci), size = 0.5, width = 0.07) +
+  scale_x_discrete(labels = c("Arts, Entertainment, Recreation", "Retail Trade")) +
+  scale_y_continuous(expand = c(0,0), limits = c(0,7), breaks = c(1:7)) +
+  labs(x = "Industry", y = "Organizational Dehumanization") +
+  theme(text = element_text(size = 13)) + guides(fill = FALSE)
+```
+
+```{r}
+source("summarySE.R")
+
+dat %>%
+  select(industry, orgdehum) %>%
+  filter(industry %in% c("retail trade", "educational services")) %>%
+  group_by(industry) %>%
+  summarySE(., measurevar = "orgdehum", groupvars = "industry", na.rm = TRUE)
+
+dat %>%
+  filter(industry %in% c("retail trade", "educational services")) %>%
+  summarySE(., measurevar = "orgdehum", groupvars = "industry", na.rm = TRUE) %>%
+  ggplot(aes(x = industry, y = orgdehum, group = industry, fill = industry)) +
+  geom_bar(stat = "identity", width = 0.3) +
+  scale_fill_grey(start = .4, end = .8) +
+  geom_errorbar(aes(ymin = orgdehum - ci, ymax = orgdehum + ci), size = 0.5, width = 0.07) +
+  scale_x_discrete(labels = c("Educational Services", "Retail Trade")) +
+  scale_y_continuous(expand = c(0,0), limits = c(0,7), breaks = c(1:7)) +
+  labs(x = "Industry", y = "Organizational Dehumanization") +
+  theme(text = element_text(size = 13)) + guides(fill = FALSE)
+```
+
+```{r}
+source("summarySE.R")
+
+dat %>%
+  select(industry, orgdehum) %>%
+  filter(industry %in% c("retail trade", "finance, insurance")) %>%
+  group_by(industry) %>%
+  summarySE(., measurevar = "orgdehum", groupvars = "industry", na.rm = TRUE)
+
+dat %>%
+  filter(industry %in% c("retail trade", "finance, insurance")) %>%
+  summarySE(., measurevar = "orgdehum", groupvars = "industry", na.rm = TRUE) %>%
+  ggplot(aes(x = industry, y = orgdehum, group = industry, fill = industry)) +
+  geom_bar(stat = "identity", width = 0.3) +
+  scale_fill_grey(start = .4, end = .8) +
+  geom_errorbar(aes(ymin = orgdehum - ci, ymax = orgdehum + ci), size = 0.5, width = 0.07) +
+  scale_x_discrete(labels = c("Finance, Insurance", "Retail Trade")) +
+  scale_y_continuous(expand = c(0,0), limits = c(0,7), breaks = c(1:7)) +
+  labs(x = "Industry", y = "Organizational Dehumanization") +
+  theme(text = element_text(size = 13)) + guides(fill = FALSE)
+```
+
+### ANOVA (BLM)
+```{r}
+summary(aov(sblm ~ industry, data = dat))
+```
+
+Significant mean difference in BLM between industries.
+
+### Tukey Test (BLM)
+```{r}
+tukey.sblmindustry <- tidy(TukeyHSD(aov(sblm ~ industry, data = dat)))
+
+tukey.sblmindustry %>%
+  select(-term) %>%
+  filter(adj.p.value < .05)
+```
+
+### Visualization (BLM)
+```{r}
+source("summarySE.R")
+
+dat %>%
+  select(industry, sblm) %>%
+  filter(industry %in% c("educational services", "accommodation, food services")) %>%
+  group_by(industry) %>%
+  summarySE(., measurevar = "sblm", groupvars = "industry", na.rm = TRUE)
+
+dat %>%
+  filter(industry %in% c("educational services", "accommodation, food services")) %>%
+  summarySE(., measurevar = "sblm", groupvars = "industry", na.rm = TRUE) %>%
+  ggplot(aes(x = industry, y = sblm, group = industry, fill = industry)) +
+  geom_bar(stat = "identity", width = 0.3) +
+  scale_fill_grey(start = .4, end = .8) +
+  geom_errorbar(aes(ymin = sblm - ci, ymax = sblm + ci), size = 0.5, width = 0.07) +
+  scale_x_discrete(labels = c("Accommodation, Food Services", "Educational Services")) +
+  scale_y_continuous(expand = c(0,0), limits = c(0,7), breaks = c(1:7)) +
+  labs(x = "Industry", y = "Supervisor's Bottom-Line Mentality") +
+  theme(text = element_text(size = 13)) + guides(fill = FALSE)
+```
+
+```{r}
+source("summarySE.R")
+
+dat %>%
+  select(industry, sblm) %>%
+  filter(industry %in% c("finance, insurance", "accommodation, food services")) %>%
+  group_by(industry) %>%
+  summarySE(., measurevar = "sblm", groupvars = "industry", na.rm = TRUE)
+
+dat %>%
+  filter(industry %in% c("finance, insurance", "accommodation, food services")) %>%
+  summarySE(., measurevar = "sblm", groupvars = "industry", na.rm = TRUE) %>%
+  ggplot(aes(x = industry, y = sblm, group = industry, fill = industry)) +
+  geom_bar(stat = "identity", width = 0.3) +
+  scale_fill_grey(start = .4, end = .8) +
+  geom_errorbar(aes(ymin = sblm - ci, ymax = sblm + ci), size = 0.5, width = 0.07) +
+  scale_x_discrete(labels = c("Accommodation, Food Services", "Finance, Insurance")) +
+  scale_y_continuous(expand = c(0,0), limits = c(0,7), breaks = c(1:7)) +
+  labs(x = "Industry", y = "Supervisor's Bottom-Line Mentality") +
+  theme(text = element_text(size = 13)) + guides(fill = FALSE)
+```
+
+```{r}
+source("summarySE.R")
+
+dat %>%
+  select(industry, sblm) %>%
+  filter(industry %in% c("retail trade", "educational services")) %>%
+  group_by(industry) %>%
+  summarySE(., measurevar = "sblm", groupvars = "industry", na.rm = TRUE)
+
+dat %>%
+  filter(industry %in% c("retail trade", "educational services")) %>%
+  summarySE(., measurevar = "sblm", groupvars = "industry", na.rm = TRUE) %>%
+  ggplot(aes(x = industry, y = sblm, group = industry, fill = industry)) +
+  geom_bar(stat = "identity", width = 0.3) +
+  scale_fill_grey(start = .4, end = .8) +
+  geom_errorbar(aes(ymin = sblm - ci, ymax = sblm + ci), size = 0.5, width = 0.07) +
+  scale_x_discrete(labels = c("Educational Services", "Retail Trade")) +
+  scale_y_continuous(expand = c(0,0), limits = c(0,7), breaks = c(1:7)) +
+  labs(x = "Industry", y = "Supervisor's Bottom-Line Mentality") +
+  theme(text = element_text(size = 13)) + guides(fill = FALSE)
+```
+
+```{r}
+source("summarySE.R")
+
+dat %>%
+  select(industry, sblm) %>%
+  filter(industry %in% c("retail trade", "finance, insurance")) %>%
+  group_by(industry) %>%
+  summarySE(., measurevar = "sblm", groupvars = "industry", na.rm = TRUE)
+
+dat %>%
+  filter(industry %in% c("retail trade", "finance, insurance")) %>%
+  summarySE(., measurevar = "sblm", groupvars = "industry", na.rm = TRUE) %>%
+  ggplot(aes(x = industry, y = sblm, group = industry, fill = industry)) +
+  geom_bar(stat = "identity", width = 0.3) +
+  scale_fill_grey(start = .4, end = .8) +
+  geom_errorbar(aes(ymin = sblm - ci, ymax = sblm + ci), size = 0.5, width = 0.07) +
+  scale_x_discrete(labels = c("Finance, Insurance", "Retail Trade")) +
+  scale_y_continuous(expand = c(0,0), limits = c(0,7), breaks = c(1:7)) +
+  labs(x = "Industry", y = "Supervisor's Bottom-Line Mentality") +
+  theme(text = element_text(size = 13)) + guides(fill = FALSE)
+```
+
+### ANOVA (HR Attributions)
+```{r}
+summary(aov(exploitatt ~ industry, data = dat))
+```
+
+```{r}
+summary(aov(wbatt ~ industry, data = dat))
+```
+
+No significant mean differences in attributions across industries. However, p-values may be considered "marginal".
+
+****
+
+## Marital Status
+
+```{r}
+dat %>%
+  group_by(marital) %>%
+  tally()
+```
+
+```{r}
+dat %>%
+  group_by(marital) %>%
+  summarize(orgdehum = mean(orgdehum, na.rm = TRUE),
+            sblm = mean(sblm, na.rm = TRUE),
+            exploitatt = mean(exploitatt, na.rm = TRUE),
+            wbatt = mean(wbatt, na.rm = TRUE))
+```
+
+```{r}
+summary(aov(orgdehum ~ marital, data = dat))
+```
+
+```{r}
+summary(aov(sblm ~ marital, data = dat))
+```
+
+```{r}
+summary(aov(exploitatt ~ marital, data = dat))
+```
+
+```{r}
+summary(aov(wbatt ~ marital, data = dat))
+```
+
+No significant mean differences in variables of interest across marital status.
+
+****
+
+## Race
+
+```{r}
+dat %>%
+  select(race) %>%
+  group_by(race) %>%
+  tally()
+```
+
+```{r}
+dat %>%
+  group_by(race) %>%
+  summarize(orgdehum = mean(orgdehum, na.rm = TRUE),
+            sblm = mean(sblm, na.rm = TRUE),
+            exploitatt = mean(exploitatt, na.rm = TRUE),
+            wbatt = mean(wbatt, na.rm = TRUE))
+```
+
+```{r}
+summary(aov(orgdehum ~ race, data = dat))
+```
+
+```{r}
+summary(aov(sblm ~ race, data = dat))
+```
+
+```{r}
+summary(aov(exploitatt ~ race, data = dat))
+```
+
+```{r}
+summary(aov(wbatt ~ race, data = dat))
+```
+
+No significant mean differences in variables of interest across races. Notably, however, Black employees appear to differ slightly.
+
+****
+
+## Org Type
+
+Organization type (for-profit vs nonprofit) was correlated with several variables of interest.
+
+### Variable Preparation
+```{r}
+dat %<>%
+  mutate(orgtype = recode_factor(orgtype, `1` = "For-profit",
+                          `0` = "Nonprofit"))
+```
+
+
+### Organization Type and Dehumanization
+```{r}
+source("summarySE.R")
+
+dat %>%
+  summarySE(., measurevar = "orgdehum", groupvars = "orgtype", na.rm = TRUE)
+```
+
+```{r}
+t.test(dat$orgdehum ~ dat$orgtype)
+```
+
+```{r}
+t.test(dat$orgdehum ~ dat$orgtype, var.equal = TRUE)
+```
+
+Significant mean difference between groups. Tests assuming equal and unequal variances yield similar results.
+
+```{r}
+source("summarySE.R")
+
+dat %>%
+  summarySE(., measurevar = "orgdehum", groupvars = "orgtype", na.rm = TRUE) %>%
+  ggplot(aes(x = orgtype, y = orgdehum, group = orgtype, fill = orgtype)) +
+  geom_bar(stat = "identity", width = 0.3) +
+  scale_fill_grey(start = .4, end = .8) +
+  geom_errorbar(aes(ymin = orgdehum - ci, ymax = orgdehum + ci), size = 0.5, width = 0.07) +
+  scale_y_continuous(expand = c(0,0), limits = c(0,7), breaks = c(1:7)) +
+  labs(x = "Organization Type", y = "Organizational Dehumanization") +
+  theme(text = element_text(size = 13)) + guides(fill = FALSE)
+```
+Note: Error bars reflect confidence intervals.
+
+### Organization Type and Exploitation Attributions
+```{r}
+source("summarySE.R")
+
+dat %>%
+  summarySE(., measurevar = "exploitatt", groupvars = "orgtype", na.rm = TRUE)
+```
+
+
+```{r}
+t.test(dat$exploitatt ~ dat$orgtype)
+```
+
+```{r}
+t.test(dat$exploitatt ~ dat$orgtype, var.equal = TRUE)
+```
+
+```{r}
+source("summarySE.R")
+
+dat %>%
+  summarySE(., measurevar = "exploitatt", groupvars = "orgtype", na.rm = TRUE) %>%
+  ggplot(aes(x = orgtype, y = exploitatt, group = orgtype, fill = orgtype)) +
+  geom_bar(stat = "identity", width = 0.3) +
+  scale_fill_grey(start = .4, end = .8) +
+  geom_errorbar(aes(ymin = exploitatt - ci, ymax = exploitatt + ci), size = 0.5, width = 0.07) +
+  scale_y_continuous(expand = c(0,0), limits = c(0,7), breaks = c(1:7)) +
+  labs(x = "Organization Type", y = "Organization-Centric HR Attributions") +
+  theme(text = element_text(size = 13)) + guides(fill = FALSE)
+```
+Note: Error bars reflect confidence intervals.
+
+### Organization Type and BLM
+```{r}
+source("summarySE.R")
+
+dat %>%
+  summarySE(., measurevar = "sblm", groupvars = "orgtype", na.rm = TRUE)
+```
+
+
+```{r}
+t.test(dat$sblm ~ dat$orgtype)
+```
+
+```{r}
+t.test(dat$sblm ~ dat$orgtype, var.equal = TRUE)
+```
+
+```{r}
+source("summarySE.R")
+
+dat %>%
+  summarySE(., measurevar = "sblm", groupvars = "orgtype", na.rm = TRUE) %>%
+  ggplot(aes(x = orgtype, y = sblm, group = orgtype, fill = orgtype)) +
+  geom_bar(stat = "identity", width = 0.3) +
+  scale_fill_grey(start = .4, end = .8) +
+  geom_errorbar(aes(ymin = sblm - ci, ymax = sblm + ci), size = 0.5, width = 0.07) +
+  scale_y_continuous(expand = c(0,0), limits = c(0,7), breaks = c(1:7)) +
+  labs(x = "Organization Type", y = "Supervisor's Bottom-line Mentality") +
+  theme(text = element_text(size = 13)) + guides(fill = FALSE)
+```
+Note: Error bars reflect confidence intervals.
+
+****
+
+## Org Levels
+
+### Org Levels and Variables of Interest
+
+```{r}
+cor.test(dat$orglevels, dat$exploitatt, method = "spearman")
+```
+
+Output for Spearman's rho yields a warning that data samples contains correlated ties. Kendall's tau-b coefficient can handle ties (below).
+
+```{r}
+cor.test(dat$orglevels, dat$exploitatt, method = "kendall")
+```
+
+
+```{r}
+cor.test(dat$orglevels, dat$orgdehum, method = "spearman")
+
+cor.test(dat$orglevels, dat$orgdehum,  method = "kendall")
+```
+
+Significant positive correlation between org levels and org dehumanization.
+
+```{r}
+cor.test(dat$orglevels, dat$sblm, method = "kendall")
+```
+
+```{r}
+cor.test(dat$orglevels, dat$wbatt, method = "kendall")
+```
+
+No significant rank correlation between org levels and BLM or well-being attributions.
+
+### Variable Preparation for Visualization
+
+```{r}
+dat %<>%
+  mutate(orglevels = recode_factor(orglevels, `1` = "three or fewer levels",
+                                   `2` = "four levels",
+                                   `3` = "five levels",
+                                   `4` = "six levels",
+                                   `5` = "seven levels or more", .ordered = TRUE))
+```
+
+### Org Levels and Exploitation Attributions
+```{r}
+source("summarySE.R")
+
+dat %>%
+  summarySE(., measurevar = "exploitatt", groupvars = "orglevels")
+```
+
+```{r}
+source("summarySE.R")
+
+dat %>%
+  summarySE(., measurevar = "exploitatt", groupvars = "orglevels") %>%
+  ggplot(aes(x = orglevels, y = exploitatt, group = 1)) + 
+    geom_errorbar(aes(ymin = exploitatt - ci, ymax = exploitatt + ci), width=.1) +
+    geom_line() + geom_point() +
+    scale_y_continuous(expand = c(0,0), limits = c(1,5)) +
+    labs(x = "Levels in Organization", y = "Exploitation Attributions") +
+    theme_classic() + guides(fill = FALSE)
+```
+
+Note: Error bars reflect confidence intervals.
+
+Confidence intervals appear to overlap substantially.
+
+### Org Levels and Organizational Dehumanization
+```{r}
+source("summarySE.R")
+
+dat %>%
+  summarySE(., measurevar = "orgdehum", groupvars = "orglevels", na.rm = TRUE)
+```
+
+```{r}
+dat %>%
+  summarySE(., measurevar = "orgdehum", groupvars = "orglevels", na.rm = TRUE) %>%
+  ggplot(aes(x = orglevels, y = orgdehum, group = 1)) + 
+    geom_errorbar(aes(ymin = orgdehum - ci, ymax = orgdehum + ci), width=.1) +
+    geom_line() + geom_point() +
+    scale_y_continuous(expand = c(0,0), limits = c(1,5)) +
+    labs(x = "Levels in Organization", y = "Exploitation Attributions") +
+    theme_classic() + guides(fill = FALSE)
+```
+
+Note: Error bars reflect confidence intervals.
+
+Confidence intervals appear to overlap substantially.
+
+****
+
+## Salary
+Note: Add argument subset = (dat$salary != 1) to remove low N group.
+```{r}
+cor.test(dat$salary, dat$exploitatt, method = "spearman")
+cor.test(dat$salary, dat$exploitatt, method = "kendall")
+```
+
+Significant negative correlation between salary and exploitation attributions.
+
+```{r}
+cor.test(dat$salary, dat$sblm, method = "spearman")
+cor.test(dat$salary, dat$sblm, method = "kendall")
+```
+
+Significant negative correlation between salary and BLM.
+
+```{r}
+cor.test(dat$salary, dat$orgdehum, method = "spearman")
+cor.test(dat$salary, dat$orgdehum, method = "kendall")
+```
+
+Significant negative correlation between salary and organizational dehumanization.
+
+```{r}
+cor.test(dat$salary, dat$wbatt, method = "spearman")
+cor.test(dat$salary, dat$wbatt, method = "kendall")
+```
+
+Significant positive correlation between salary and well-being attributions.
+
+### Variable Preparation for Visualization
+```{r}
+dat %<>%
+  mutate(salary = recode_factor(salary, `1` = "less than $10,000",
+                                `2` = "$10,000 to $19,999",
+                                `3` = "$20,000 to $29,999",
+                                `4` = "$30,000 to $39,999",
+                                `5` = "$40,000 to $49,999",
+                                `6` = "$50,000 to $59,999",
+                                `7` = "$60,000 to $69,999",
+                                `8` = "$70,000 or more", .ordered = TRUE))
+```
+
+### Salary and Exploitation Attributions
+```{r}
+source("summarySE.R")
+
+dat %>%
+  summarySE(., measurevar = "exploitatt", groupvars = "salary", na.rm = TRUE)
+```
+
+Perhaps omit individuals with salary < $10,000 due to low N-size?
+
+```{r}
+source("summarySE.R")
+
+dat %>%
+  summarySE(., measurevar = "exploitatt", groupvars = "salary", na.rm = TRUE) %>%
+  ggplot(aes(x = salary, y = exploitatt, group = 1)) + 
+    geom_errorbar(aes(ymin = exploitatt - ci, ymax = exploitatt + ci), width=.1) +
+    geom_line() + geom_point() +
+    scale_y_continuous(expand = c(0,0), limits = c(0,7)) +
+    labs(x = "Salary", y = "Exploitation Attributions") +
+    theme_classic() + theme(axis.text.x = element_text(angle = 90, hjust = 1))
+```
+Note: Error bars reflect confidence intervals.
+CIs for lowest salary group does not fit within y-scale.
+
+### Salary and Supervisor's Bottom-line Mentality
+```{r}
+source("summarySE.R")
+
+dat %>%
+  summarySE(., measurevar = "sblm", groupvars = "salary", na.rm = TRUE)
+```
+
+```{r}
+source("summarySE.R")
+
+dat %>%
+  summarySE(., measurevar = "sblm", groupvars = "salary", na.rm = TRUE) %>%
+  ggplot(aes(x = salary, y = sblm, group = 1)) + 
+    geom_errorbar(aes(ymin = sblm - ci, ymax = sblm + ci), width=.1) +
+    geom_line() + geom_point() +
+    scale_y_continuous(expand = c(0,0), limits = c(0,7)) +
+    labs(x = "Salary", y = "Supervisor's Bottom-line Mentality") +
+    theme_classic() + theme(axis.text.x = element_text(angle = 90, hjust = 1))
+```
+
+
+### Salary and Organizational Dehumanization
+```{r}
+source("summarySE.R")
+
+dat %>%
+  summarySE(., measurevar = "orgdehum", groupvars = "salary", na.rm = TRUE)
+```
+
+```{r}
+source("summarySE.R")
+
+dat %>%
+  summarySE(., measurevar = "orgdehum", groupvars = "salary", na.rm = TRUE) %>%
+  ggplot(aes(x = salary, y = orgdehum, group = 1)) + 
+    geom_errorbar(aes(ymin = orgdehum - ci, ymax = orgdehum + ci), width=.1) +
+    geom_line() + geom_point() +
+    scale_y_continuous(expand = c(0,0), limits = c(0,7)) +
+    labs(x = "Salary", y = "Organizational Dehumanization") +
+    theme_classic() + theme(axis.text.x = element_text(angle = 90, hjust = 1))
+```
+
+### Salary and Well-being Attributions
+```{r}
+source("summarySE.R")
+
+dat %>%
+  summarySE(., measurevar = "wbatt", groupvars = "salary", na.rm = TRUE)
+```
+
+```{r}
+source("summarySE.R")
+
+dat %>%
+  summarySE(., measurevar = "wbatt", groupvars = "salary", na.rm = TRUE) %>%
+  ggplot(aes(x = salary, y = wbatt, group = 1)) + 
+    geom_errorbar(aes(ymin = wbatt - ci, ymax = wbatt + ci), width=.1) +
+    geom_line() + geom_point() +
+    scale_y_continuous(expand = c(0,0), limits = c(0,7)) +
+    labs(x = "Salary", y = "Well-being Attributions") +
+    theme_classic() + theme(axis.text.x = element_text(angle = 90, hjust = 1))
+```
+
+****
+
+## Education
+
+```{r}
+cor.test(dat$edu, dat$sblm, method = "spearman")
+cor.test(dat$edu, dat$sblm, method = "kendall")
+```
+
+Significant negative correlation between education and BLM.
+
+```{r}
+cor.test(dat$edu, dat$orgdehum, method = "spearman")
+cor.test(dat$edu, dat$orgdehum, method = "kendall")
+```
+
+Significant negative correlation between education and org dehumanization.
+
+### Variable Preparation for Visualization
+
+```{r}
+dat %<>%
+  mutate(edu = recode_factor(edu, `1` = "high school, GED",
+                             `2` = "associates",
+                             `3` = "college",
+                             `4` = "masters",
+                             `5` = "doctoral", .ordered = TRUE))
+```
+
+### Education and BLM
+```{r}
+source("summarySE.R")
+
+dat %>%
+  summarySE(., measurevar = "sblm", groupvars = "edu", na.rm = TRUE)
+```
+
+```{r}
+source("summarySE.R")
+
+dat %>%
+  summarySE(., measurevar = "sblm", groupvars = "edu", na.rm = TRUE) %>%
+  ggplot(aes(x = edu, y = sblm, group = 1)) + 
+    geom_errorbar(aes(ymin = sblm - ci, ymax = sblm + ci), width=.1) +
+    geom_line() + geom_point() +
+    scale_y_continuous(expand = c(0,0), limits = c(0,7)) +
+    labs(x = "Education", y = "Supervisor's Bottom-line Mentality") +
+    theme_classic() + theme(axis.text.x = element_text(angle = 90, hjust = 1))
+```
+
+
+### Education and Org Dehumanization
+```{r}
+source("summarySE.R")
+
+dat %>%
+  summarySE(., measurevar = "orgdehum", groupvars = "edu", na.rm = TRUE)
+```
+
+```{r}
+source("summarySE.R")
+
+dat %>%
+  summarySE(., measurevar = "orgdehum", groupvars = "edu", na.rm = TRUE) %>%
+  ggplot(aes(x = edu, y = orgdehum, group = 1)) + 
+    geom_errorbar(aes(ymin = orgdehum - ci, ymax = orgdehum + ci), width=.1) +
+    geom_line() + geom_point() +
+    scale_y_continuous(expand = c(0,0), limits = c(0,7)) +
+    labs(x = "Education", y = "Organizational Dehumanization") +
+    theme_classic() + theme(axis.text.x = element_text(angle = 90, hjust = 1))
+```
+
+Notably, education is positively related to salary and responsibility for direct reports.
+
+****
+## Responsible for Direct Reports
+
+Responsibility for direct reports correlated with well-being attributions and org dehumanization.
+
+### Variable Preparation
+```{r}
+dat %<>%
+  mutate(dirreport = recode_factor(dirreport, `1` = "Yes",
+                                   `0` = "No"))
+```
+
+### Responsibility and Well-being Attributions
+```{r}
+source("summarySE.R")
+
+dat%>%
+  summarySE(., measurevar = "wbatt", groupvars = "dirreport", na.rm = TRUE)
+```
+
+```{r}
+t.test(dat$wbatt ~ dat$dirreport, var.equal = TRUE)
+```
+
+```{r}
+source("summarySE.R")
+
+dat %>%
+  summarySE(., measurevar = "wbatt", groupvars = "dirreport", na.rm = TRUE) %>%
+  ggplot(aes(x = dirreport, y = wbatt, group = dirreport, fill = dirreport)) +
+  geom_bar(stat = "identity", width = 0.3) +
+  scale_fill_grey(start = .4, end = .8) +
+  geom_errorbar(aes(ymin = wbatt - ci, ymax = wbatt + ci), size = 0.5, width = 0.07) +
+  scale_y_continuous(expand = c(0,0), limits = c(0,7), breaks = c(1:7)) +
+  labs(x = "Responsibility for Direct Reports", y = "Employee-Centric HR Attributions") +
+  theme(text = element_text(size = 13)) + guides(fill = FALSE)
+```
+Note: Error bars represent confidence intervals.
+
+Although t-test is significant, confidence intervals overlap.
+
+### Responsibility and Org Dehumanization
+```{r}
+source("summarySE.R")
+
+dat %>%
+  summarySE(., measurevar = "orgdehum", groupvars = "dirreport", na.rm = TRUE)
+```
+
+```{r}
+t.test(dat$orgdehum ~ dat$dirreport, var.equal = TRUE)
+```
+
+```{r}
+source("summarySE.R")
+
+dat %>%
+  summarySE(., measurevar = "orgdehum", groupvars = "dirreport", na.rm = TRUE) %>%
+  ggplot(aes(x = dirreport, y = orgdehum, group = dirreport, fill = dirreport)) +
+  geom_bar(stat = "identity", width = 0.3) +
+  scale_fill_grey(start = .4, end = .8) +
+  geom_errorbar(aes(ymin = orgdehum - ci, ymax = orgdehum + ci), size = 0.5, width = 0.07) +
+  scale_y_continuous(expand = c(0,0), limits = c(0,7), breaks = c(1:7)) +
+  labs(x = "Responsibility for Direct Reports", y = "Organizational Dehumanization") +
+  theme(text = element_text(size = 13)) + guides(fill = FALSE)
+```
+Note: Error bars represent confidence intervals.
+
+Although t-test is significant, confidence intervals overlap.
+
+****
+
