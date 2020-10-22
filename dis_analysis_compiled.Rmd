@@ -7,7 +7,8 @@ output:
     theme: cerulean
     highlight: tango
     number_sections: yes
-    toc: yes
+    toc: true
+    toc_float: true
 ---
 
 ```{r, message = FALSE}
